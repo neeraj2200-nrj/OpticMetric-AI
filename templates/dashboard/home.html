@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}OpticMetric AI - Clinical Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    Clinical Workstation / Overview Dashboard
+{% endblock %}
+
+{% block content %}
+<!-- Bento Grid: Overview Cards -->
+<div class="row g-4 mb-4">
+    <!-- Card: Total Scans -->
+    <div class="col-md-3 col-sm-6">
+        <div class="clinical-card mb-0">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em;">Total Scans</span>
+                <span class="material-symbols-outlined text-primary">analytics</span>
+            </div>
+            <p class="font-mono-data font-weight-bold m-0" style="font-size: 28px; line-height: 1.1;">{{ total_scans }}</p>
+            <span class="text-muted" style="font-size: 11px;">Scans in local archive</span>
+        </div>
+    </div>
+    
+    <!-- Card: Suspected Glaucoma -->
+    <div class="col-md-3 col-sm-6">
+        <div class="clinical-card mb-0">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em;">Suspected Pathology</span>
+                <span class="material-symbols-outlined text-danger">warning</span>
+            </div>
+            <p class="font-mono-data font-weight-bold m-0 text-danger" style="font-size: 28px; line-height: 1.1;">{{ suspects_count }}</p>
+            <span class="text-muted" style="font-size: 11px;">Referral required</span>
+        </div>
+    </div>
+    
+    <!-- Card: Pending Pipeline -->
+    <div class="col-md-3 col-sm-6">
+        <div class="clinical-card mb-0">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em;">Pending Inference</span>
+                <span class="material-symbols-outlined text-muted">query_builder</span>
+            </div>
+            <p class="font-mono-data font-weight-bold m-0 text-muted" style="font-size: 28px; line-height: 1.1;">{{ pending_count }}</p>
+            <span class="text-muted" style="font-size: 11px;">Awaiting ML model link</span>
+        </div>
+    </div>
+    
+    <!-- Card: Accuracy Rate -->
+    <div class="col-md-3 col-sm-6">
+        <div class="clinical-card mb-0">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em;">System Speed</span>
+            </div>
+            <p class="font-mono-data font-weight-bold m-0 text-success" style="font-size: 28px; line-height: 1.1;">{{ avg_processing_speed|stringformat:".1f" }}s</p>
+            <span class="text-muted" style="font-size: 11px;">Average GPU latency</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Left Section: Performance Chart -->
+    <div class="col-lg-8">
+        <div class="clinical-card h-100 mb-0">
+            <div class="clinical-card-header">
+                <h3 class="clinical-card-title">Workstation Scan Load</h3>
+                <span class="text-muted" style="font-size: 11px;">Hourly performance logs</span>
+            </div>
+            
+            <!-- Simulated bar chart -->
+            <div class="performance-chart-bar-container">
+                <div class="performance-chart-bar" style="height: 60%;" title="08:00 - 4 scans"></div>
+                <div class="performance-chart-bar" style="height: 80%;" title="09:00 - 8 scans"></div>
+                <div class="performance-chart-bar" style="height: 75%;" title="10:00 - 7 scans"></div>
+                <div class="performance-chart-bar" style="height: 90%;" title="11:00 - 9 scans"></div>
+                <div class="performance-chart-bar" style="height: 85%;" title="12:00 - 8 scans"></div>
+                <div class="performance-chart-bar" style="height: 95%;" title="13:00 - 10 scans"></div>
+                <div class="performance-chart-bar" style="height: 70%;" title="14:00 - 7 scans"></div>
+                <div class="performance-chart-bar" style="height: 82%;" title="15:00 - 8 scans"></div>
+                <div class="performance-chart-bar" style="height: 88%;" title="16:00 - 8 scans"></div>
+                <div class="performance-chart-bar" style="height: 92%;" title="17:00 - 9 scans"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2 font-mono-data text-muted" style="font-size: 11px;">
+                <span>08:00 AM</span>
+                <span>12:00 PM</span>
+                <span>05:00 PM</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Section: Quick Actions / ML Status -->
+    <div class="col-lg-4">
+        <div class="clinical-card h-100 mb-0 d-flex flex-column justify-content-between bg-primary text-white border-0" style="background-color: var(--primary) !important;">
+            <div>
+                <h3 class="mb-3 text-white" style="font-size: 18px; font-weight: 700;">Acquisition Workstation</h3>
+                <p style="font-size: 13px; opacity: 0.9; line-height: 1.5;">
+                    Acquire new retinal fundus scans. The system automatically processes images through U-Net segmentations and outputs clinical diagnostic predictions.
+                </p>
+            </div>
+            
+            <div class="mt-4">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255,255,255,0.15);">
+                        <span class="material-symbols-outlined text-white" style="font-size: 28px;">add_a_photo</span>
+                    </div>
+                    <div>
+                        <p class="m-0 font-weight-bold" style="font-size: 13px; line-height: 1.2;">Local Scan Upload</p>
+                        <p class="m-0" style="font-size: 10px; opacity: 0.75;">Supports PNG, JPEG format</p>
+                    </div>
+                </div>
+                
+                <a href="{% url 'analysis:image_analysis' %}" class="btn btn-light w-100 font-weight-bold py-2.5 text-primary" style="font-size: 13px; font-weight: 600;">
+                    Open Acquisition Screen
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="clinical-card">
+    <div class="clinical-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <h3 class="clinical-card-title">Recent Patient Scans</h3>
+        <form method="GET" action="{% url 'dashboard:home' %}" class="d-flex flex-wrap align-items-center gap-2" id="filterForm">
+            <!-- Diagnosis Filter -->
+            <select name="diag" class="form-select form-select-sm" style="width: auto; font-size: 11.5px;" onchange="this.form.submit()">
+                <option value="all" {% if request.GET.diag == 'all' or not request.GET.diag %}selected{% endif %}>All Diagnoses</option>
+                <option value="glaucoma" {% if request.GET.diag == 'glaucoma' %}selected{% endif %}>Glaucoma</option>
+                <option value="normal" {% if request.GET.diag == 'normal' %}selected{% endif %}>Normal</option>
+                <option value="pending" {% if request.GET.diag == 'pending' %}selected{% endif %}>Pending</option>
+            </select>
+            
+            <!-- Gender Filter -->
+            <select name="gender" class="form-select form-select-sm" style="width: auto; font-size: 11.5px;" onchange="this.form.submit()">
+                <option value="all" {% if request.GET.gender == 'all' or not request.GET.gender %}selected{% endif %}>All Genders</option>
+                <option value="Male" {% if request.GET.gender == 'Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if request.GET.gender == 'Female' %}selected{% endif %}>Female</option>
+            </select>
+            
+            <!-- Sort Filter -->
+            <select name="sort" class="form-select form-select-sm" style="width: auto; font-size: 11.5px;" onchange="this.form.submit()">
+                <option value="newest" {% if request.GET.sort == 'newest' or not request.GET.sort %}selected{% endif %}>Newest Scans</option>
+                <option value="confidence_high" {% if request.GET.sort == 'confidence_high' %}selected{% endif %}>Highest Confidence</option>
+                <option value="confidence_low" {% if request.GET.sort == 'confidence_low' %}selected{% endif %}>Lowest Confidence</option>
+                <option value="vcdr_high" {% if request.GET.sort == 'vcdr_high' %}selected{% endif %}>Highest VCDR</option>
+            </select>
+            
+            <!-- Clear Filters -->
+            {% if request.GET.diag or request.GET.gender or request.GET.sort %}
+                <a href="{% url 'dashboard:home' %}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="font-size: 11.5px;">
+                    <span class="material-symbols-outlined text-[14px]" style="font-size: 14px;">close</span>
+                    <span>Clear</span>
+                </a>
+            {% endif %}
+        </form>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="table-light" style="font-size: 11px; text-transform: uppercase; color: var(--on-surface-variant); border-bottom: 1px solid var(--outline-variant);">
+                    <th class="ps-4">Scan Identifier</th>
+                    <th>Patient Demographics</th>
+                    <th>Acquisition Timestamp</th>
+                    <th>Diagnostic Assessment</th>
+                    <th class="text-end pe-4">Workstation link</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 13px; border-top: 0;">
+                {% for scan in analyses %}
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--outline-variant); background-color: #000;">
+                                    <img src="{{ scan.uploaded_image.url }}" alt="Fundus preview" style="width: 100%; height: 100%; object-fit: cover;"/>
+                                </div>
+                                <div>
+                                    <p class="m-0 font-weight-bold" style="font-size: 13px; color: var(--on-surface);">
+                                        {{ scan.uploaded_image.name|cut:"uploads/" }}
+                                    </p>
+                                    <p class="m-0 text-muted font-mono-data" style="font-size: 11px;">Patient ID: {{ scan.patient.patient_id }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <span>Age {{ scan.patient.age }}y / {{ scan.patient.gender }}</span>
+                        </td>
+                        <td class="py-3 font-mono-data text-muted">
+                            {{ scan.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="py-3">
+                            {% if scan.vcdr is not None %}
+                                {% if scan.diagnosis == 'Normal' %}
+                                    <span class="badge-clinical badge-clinical-normal">
+                                        <span class="rounded-circle bg-success" style="width: 6px; height: 6px; display: inline-block;"></span>
+                                        Normal
+                                    </span>
+                                {% else %}
+                                    <span class="badge-clinical badge-clinical-suspected">
+                                        <span class="rounded-circle bg-danger" style="width: 6px; height: 6px; display: inline-block;"></span>
+                                        Suspected
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge-clinical badge-clinical-pending">
+                                    <span class="rounded-circle bg-secondary" style="width: 6px; height: 6px; display: inline-block;"></span>
+                                    Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4 py-3">
+                            <div class="d-inline-flex align-items-center gap-3">
+                                <a href="{% url 'analysis:analysis_results' analysis_id=scan.id %}" class="btn btn-link text-primary font-weight-bold text-decoration-none p-0 d-inline-flex align-items-center gap-1" style="font-size: 13px;">
+                                    <span>Diagnostics Console</span>
+                                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                                </a>
+                                <form action="{% url 'analysis:delete_analysis' analysis_id=scan.id %}" method="POST" class="d-inline m-0" onsubmit="return confirm('Are you sure you want to permanently delete this scan and patient record?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link text-danger p-0 d-flex align-items-center border-0 bg-transparent" title="Delete scan record">
+                                        <span class="material-symbols-outlined text-[18px]" style="font-size: 18px;">delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <span class="material-symbols-outlined text-[36px] mb-2" style="font-size: 36px; color: var(--outline);">folder_open</span>
+                            <p class="m-0">No scans available. Please upload a retinal fundus scan to populate the database.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

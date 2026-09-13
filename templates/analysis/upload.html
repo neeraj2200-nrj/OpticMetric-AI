@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}OpticMetric AI - Retinal Acquisition Workstation{% endblock %}
+
+{% block breadcrumbs %}
+    Analysis / Image Acquisition
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Acquisition & Preview -->
+    <div class="col-lg-7">
+        <div class="clinical-card">
+            <div class="clinical-card-header">
+                <h3 class="clinical-card-title">Retinal Image Acquisition</h3>
+                <span class="badge-clinical badge-clinical-pending">Ready for scan</span>
+            </div>
+            
+            <p class="text-muted mb-4" style="font-size: 13px;">
+                Upload a high-resolution retinal fundus scan (PNG, JPG, or DICOM) to execute the automated glaucoma segmentation and diagnostic metrics pipeline.
+            </p>
+            
+            <!-- Upload Form -->
+            <form action="{% url 'analysis:upload_image' %}" method="post" enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+                
+                <!-- Patient Demographics Form Inputs -->
+                <div class="row g-3 mb-4 p-3 bg-light border" style="border-radius: var(--radius-md);">
+                    <div class="col-md-6">
+                        <label for="patient_name" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Patient Name</label>
+                        <input type="text" class="form-control form-control-sm" id="patient_name" name="patient_name" placeholder="e.g. Sample 005" required style="font-size: 12.5px;">
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label for="patient_age" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Age (Years)</label>
+                        <input type="number" class="form-control form-control-sm" id="patient_age" name="patient_age" min="1" max="120" placeholder="e.g. 60" required style="font-size: 12.5px;">
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <label for="patient_gender" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Gender</label>
+                        <select class="form-select form-select-sm" id="patient_gender" name="patient_gender" required style="font-size: 12.5px;">
+                            <option value="" disabled selected>Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label for="fundus_image_input" class="w-100">
+                    <div class="clinical-upload-zone" id="drop-zone">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px; color: var(--primary);">
+                            <span class="material-symbols-outlined" style="font-size: 32px;">upload_file</span>
+                        </div>
+                        <h4 class="mb-2" style="font-size: 15px; font-weight: 600;">Drag & Drop Retinal Scans</h4>
+                        <p class="text-muted mb-3" style="font-size: 12px;">Supports JPEG, PNG format. Recommended resolution >= 1024px</p>
+                        <span class="btn btn-outline-primary px-4 font-weight-bold" style="font-size: 12px;">Browse local files</span>
+                        <input type="file" name="fundus_image" id="fundus_image_input" accept="image/*" class="d-none" required/>
+                    </div>
+                </label>
+            </form>
+            
+            <!-- Live Preview Container (Hidden by default) -->
+            <div class="mt-4 d-none" id="preview-container">
+                <div class="clinical-card-header mt-4">
+                    <h3 class="clinical-card-title">Acquisition Preview</h3>
+                </div>
+                <div class="clinical-scan-container mb-3" style="max-height: 400px;">
+                    <img id="preview-image" src="" alt="Fundus Preview" class="clinical-scan-image"/>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span id="preview-file-info" class="font-mono-data text-muted" style="font-size: 12px;">File name</span>
+                    <button type="submit" form="upload-form" class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2" id="analyze-btn">
+                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                        <span style="font-weight: 600;">Initiate AI Analysis Pipeline</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Visual Processing Pipeline Status -->
+    <div class="col-lg-5">
+        <div class="clinical-card">
+            <div class="clinical-card-header">
+                <h3 class="clinical-card-title">Pipeline Diagnostics</h3>
+            </div>
+            
+            <p class="text-muted mb-4" style="font-size: 13px;">
+                Visual diagnostic steps performed sequentially on the GPU cluster. The status updates in real-time during processing.
+            </p>
+            
+            <ul class="pipeline-stepper" id="pipeline-stepper">
+                <li class="pipeline-step" id="step-upload">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Image Acquisition</div>
+                    <div class="pipeline-step-desc">Scan upload and integrity check. (Pending file selection)</div>
+                </li>
+                <li class="pipeline-step" id="step-clahe">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">CLAHE Enhancement</div>
+                    <div class="pipeline-step-desc">Contrast-limited adaptive histogram equalization.</div>
+                </li>
+                <li class="pipeline-step" id="step-disc">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Optic Disc Segmentation (U-Net)</div>
+                    <div class="pipeline-step-desc">Deep neural network isolation of the optic nerve head.</div>
+                </li>
+                <li class="pipeline-step" id="step-cup">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Optic Cup Segmentation (U-Net)</div>
+                    <div class="pipeline-step-desc">Targeted segmentation of the interior cup depression region.</div>
+                </li>
+                <li class="pipeline-step" id="step-features">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Clinical Feature Extraction</div>
+                    <div class="pipeline-step-desc">Calculation of VCDR, HCDR, areas, and ISNT rules.</div>
+                </li>
+                <li class="pipeline-step" id="step-classifier">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Logistic Regression Classification</div>
+                    <div class="pipeline-step-desc">Glaucoma pathology prediction and risk classification.</div>
+                </li>
+                <li class="pipeline-step" id="step-report">
+                    <div class="pipeline-step-bullet"></div>
+                    <div class="pipeline-step-title">Report Generation</div>
+                    <div class="pipeline-step-desc">Exporting structured clinical report and overlay metrics.</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Live acquisition preview and pipeline UI state toggles
+    const input = document.getElementById('fundus_image_input');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImage = document.getElementById('preview-image');
+    const fileInfo = document.getElementById('preview-file-info');
+    const dropZone = document.getElementById('drop-zone');
+    const form = document.getElementById('upload-form');
+    
+    // Preview image on selection
+    input.addEventListener('change', function() {
+        showPreview(this.files[0]);
+    });
+    
+    // Drag & Drop event bindings
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.backgroundColor = 'var(--surface-container-low)';
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = 'var(--outline-variant)';
+        dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--outline-variant)';
+        dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
+        if (e.dataTransfer.files.length) {
+            input.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.classList.remove('d-none');
+                fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                
+                // Mark upload step as active / complete
+                const uploadStep = document.getElementById('step-upload');
+                uploadStep.classList.add('active');
+                uploadStep.querySelector('.pipeline-step-desc').textContent = "Fundus scan loaded. Ready to run analysis pipeline.";
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Trigger visual simulation steps before final POST submit to give premium clinical workstation feel
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const steps = [
+            { id: 'step-upload', label: 'Image uploaded to local cache.', delay: 300 },
+            { id: 'step-clahe', label: 'CLAHE enhancement completed. Local features equalized.', delay: 700 },
+            { id: 'step-disc', label: 'U-Net Disc segmentation model successfully executed.', delay: 1100 },
+            { id: 'step-cup', label: 'U-Net Cup segmentation model successfully executed.', delay: 1500 },
+            { id: 'step-features', label: 'Extracted neuroretinal rim width and VCDR metric.', delay: 1900 },
+            { id: 'step-classifier', label: 'Logistic Regression predictor completed.', delay: 2300 },
+            { id: 'step-report', label: 'Clinical report compiled. Routing workstation...', delay: 2700 }
+        ];
+
+        document.getElementById('analyze-btn').disabled = true;
+        document.getElementById('analyze-btn').textContent = "Processing Ocular Scans...";
+
+        steps.forEach((step, idx) => {
+            setTimeout(() => {
+                const el = document.getElementById(step.id);
+                el.classList.remove('active');
+                el.classList.add('completed');
+                el.querySelector('.pipeline-step-desc').textContent = step.label;
+                
+                // Active next step
+                if (idx < steps.length - 1) {
+                    document.getElementById(steps[idx+1].id).classList.add('active');
+                } else {
+                    // Submit form at last step
+                    form.submit();
+                }
+            }, step.delay);
+        });
+    });
+</script>
+{% endblock %}

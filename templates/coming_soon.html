@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}OpticMetric AI - Module Coming Soon{% endblock %}
+
+{% block breadcrumbs %}
+    Future Module / Coming Soon
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="clinical-card p-5">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 80px; height: 80px; color: var(--primary);">
+                    <span class="material-symbols-outlined" style="font-size: 48px;">construction</span>
+                </div>
+                
+                <h3 class="mb-3 font-weight-bold">Clinical Module Coming Soon</h3>
+                <p class="text-muted mb-4">
+                    The requested workstation panel <strong>"{{ module_name }}"</strong> is scheduled for integration in the next software update. The database structure and UI slots have already been prepared for this module.
+                </p>
+                
+                <div class="p-3 bg-light rounded text-start mb-4 border" style="font-size: 13px;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Module Key:</span>
+                        <span class="font-mono-data text-dark font-weight-bold">{{ module_key }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Integration Status:</span>
+                        <span class="text-warning font-weight-bold">Phase 2 Candidate</span>
+                    </div>
+                </div>
+                
+                <a href="{% url 'dashboard:home' %}" class="btn btn-primary px-4 py-2 font-weight-bold" style="font-size: 13px;">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-3">
+            <div class="w-8 h-8 rounded bg-primary d-flex align-items-center justify-center text-white" style="width: 32px; height: 32px; border-radius: 4px;">
+                <span class="material-symbols-outlined text-[20px]" style="font-size: 20px;">biotech</span>
+            </div>
+            <div class="d-flex flex-column">
+                <h1 class="m-0 font-headline-sm" style="font-size: 18px; font-weight: 700; color: var(--primary); line-height: 1;">OpticMetric AI</h1>
+                <span class="text-uppercase font-weight-bold" style="font-size: 9px; letter-spacing: 0.15em; color: var(--on-surface-variant); margin-top: 2px;">Clinical Workstation</span>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <!-- Main Clinical Views -->
+        <a class="sidebar-nav-link {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:home' %}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span>Dashboard</span>
+        </a>
+        <a class="sidebar-nav-link {% if request.resolver_match.app_name == 'analysis' %}active{% endif %}" href="{% url 'analysis:image_analysis' %}">
+            <span class="material-symbols-outlined">biotech</span>
+            <span>Image Analysis</span>
+        </a>
+        <a class="sidebar-nav-link {% if request.resolver_match.app_name == 'reports' %}active{% endif %}" href="{% url 'reports:clinical_report_default' %}">
+            <span class="material-symbols-outlined">description</span>
+            <span>Clinical Report</span>
+        </a>
+        <a class="sidebar-nav-link {% if request.resolver_match.app_name == 'about' %}active{% endif %}" href="{% url 'about:about_methodology' %}">
+            <span class="material-symbols-outlined">info</span>
+            <span>About</span>
+        </a>
+
+        <!-- Separator -->
+        <hr class="my-3" style="border-color: var(--outline-variant);"/>
+        
+        <!-- Future Functionality (Coming Soon) -->
+        <div class="px-3 mb-2 text-uppercase" style="font-size: 10px; font-weight: 700; color: var(--outline); letter-spacing: 0.05em;">Future modules</div>
+        <a class="sidebar-nav-link" href="{% url 'dashboard:coming_soon' %}?module=history" style="opacity: 0.65;">
+            <span class="material-symbols-outlined">history</span>
+            <span>Patient History</span>
+        </a>
+        <a class="sidebar-nav-link" href="{% url 'dashboard:coming_soon' %}?module=batch" style="opacity: 0.65;">
+            <span class="material-symbols-outlined">layers</span>
+            <span>Batch Analysis</span>
+        </a>
+        <a class="sidebar-nav-link" href="{% url 'dashboard:coming_soon' %}?module=comparison" style="opacity: 0.65;">
+            <span class="material-symbols-outlined">compare_arrows</span>
+            <span>Model Comparison</span>
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <div class="d-flex justify-content-between">
+            <span>Clinical v2.4.1</span>
+            <span class="text-success font-weight-bold">• Connected</span>
+        </div>
+    </div>
+</aside>

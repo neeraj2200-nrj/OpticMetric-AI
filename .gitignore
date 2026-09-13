@@ -1,0 +1,48 @@
+# Python virtual environments
+venv/
+env/
+.venv/
+ENV/
+myenv/
+
+# Python cache/compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django generated files
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python tooling/cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build/package artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log

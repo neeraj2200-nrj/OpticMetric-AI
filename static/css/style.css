@@ -1,0 +1,451 @@
+/*
+ * OpticMetric AI - Clinical Workstation Custom Stylesheet
+ * Integrates with Bootstrap 5 to faithfully recreate the Stitch design system.
+ */
+
+:root {
+    /* Color Palette */
+    --primary: #003f8b;
+    --primary-container: #0055b8;
+    --on-primary: #ffffff;
+    
+    --secondary: #505f76;
+    --secondary-container: #d0e1fb;
+    --on-secondary-container: #54647a;
+    
+    --tertiary: #004c32; /* Clinical green for normal limits */
+    --tertiary-container: #006645;
+    --on-tertiary-container: #5ae8ac;
+    
+    --error: #ba1a1a; /* Clinical red for suspected pathology */
+    --error-container: #ffdad6;
+    --on-error-container: #93000a;
+    
+    --background: #f8fafc;
+    --surface: #f9f9ff;
+    --surface-bright: #f9f9ff;
+    --surface-dim: #cfdaf2;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #f0f3ff;
+    --surface-container: #e7eeff;
+    --surface-container-high: #dee8ff;
+    --surface-container-highest: #d8e3fb;
+    
+    --on-surface: #111c2d;
+    --on-surface-variant: #424753;
+    
+    --outline: #737784;
+    --outline-variant: #c2c6d5;
+    
+    /* Layout Constants */
+    --sidebar-width: 260px;
+    --navbar-height: 64px;
+    --gutter: 1.5rem;
+    
+    /* Border Radii */
+    --radius-sm: 0.125rem;
+    --radius-md: 0.25rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+}
+
+/* Base Styles & Typography */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--on-surface);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--on-surface);
+    letter-spacing: -0.01em;
+}
+
+/* Mono-data typography for clinical metrics */
+.font-mono-data {
+    font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--outline-variant);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--outline);
+}
+
+/* Sidebar Layout */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: var(--surface);
+    border-right: 1px solid var(--outline-variant);
+    z-index: 1000;
+    display: flex;
+    flex-col: true;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--outline-variant);
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+    padding: 1rem 0.75rem;
+}
+
+.sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar-nav-link:hover {
+    background-color: var(--surface-container-low);
+    color: var(--primary);
+}
+
+.sidebar-nav-link.active {
+    background-color: var(--secondary-container);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.sidebar-nav-link .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-t: 1px solid var(--outline-variant);
+    border-top: 1px solid var(--outline-variant);
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    background-color: var(--surface-container-low);
+}
+
+/* Navbar Layout */
+.top-navbar {
+    height: var(--navbar-height);
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    background-color: var(--surface-bright);
+    border-bottom: 1px solid var(--outline-variant);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--gutter);
+}
+
+/* Main Content Workspace */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    padding-top: var(--navbar-height);
+    min-height: 100vh;
+}
+
+.main-content {
+    padding: var(--gutter);
+    max-width: var(--container-max);
+    margin: 0 auto;
+}
+
+/* Clinical Bento Cards */
+.clinical-card {
+    background-color: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: var(--gutter);
+    transition: border-color 0.2s ease-in-out;
+}
+
+.clinical-card:hover {
+    border-color: var(--primary-container);
+}
+
+.clinical-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--outline-variant);
+    padding-bottom: 0.75rem;
+}
+
+.clinical-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--on-surface-variant);
+}
+
+/* Clinical Badges */
+.badge-clinical {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-clinical-normal {
+    background-color: #e6f4ea;
+    color: var(--tertiary);
+    border: 1px solid #ceead6;
+}
+
+.badge-clinical-suspected {
+    background-color: var(--error-container);
+    color: var(--error);
+    border: 1px solid #fad2e1;
+}
+
+.badge-clinical-pending {
+    background-color: var(--surface-container-high);
+    color: var(--secondary);
+    border: 1px solid var(--outline-variant);
+}
+
+/* Visual Overlays & Images */
+.clinical-scan-container {
+    position: relative;
+    background-color: #000000;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clinical-scan-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clinical-scan-image.mask-opacity {
+    opacity: 0.6;
+}
+
+/* Absolute Mask Overlays (CSS Shapes) */
+.mask-overlay-disc {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    border: 2px dashed #fbbf24; /* yellow-400 equivalent */
+    border-radius: 50%;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.mask-overlay-cup {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    border: 2px dashed #22d3ee; /* cyan-400 equivalent */
+    border-radius: 50%;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+/* Pending Clinical Placeholder State */
+.pending-placeholder-mask {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(9, 14, 28, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    text-align: center;
+    padding: 1.5rem;
+    z-index: 10;
+}
+
+.pending-placeholder-mask .material-symbols-outlined {
+    font-size: 40px;
+    margin-bottom: 0.75rem;
+    color: var(--outline);
+}
+
+/* Upload zone */
+.clinical-upload-zone {
+    border: 2px dashed var(--outline-variant);
+    border-radius: var(--radius-lg);
+    background-color: var(--surface-container-lowest);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.clinical-upload-zone:hover {
+    border-color: var(--primary);
+    background-color: var(--surface-container-low);
+}
+
+/* Stepper / Processing steps list */
+.pipeline-stepper {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.pipeline-step {
+    position: relative;
+    padding-left: 2.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.pipeline-step::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 20px;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--outline-variant);
+}
+
+.pipeline-step:last-child::before {
+    display: none;
+}
+
+.pipeline-step-bullet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--surface-container-high);
+    border: 2px solid var(--outline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.pipeline-step.active .pipeline-step-bullet {
+    background-color: var(--primary);
+    border-color: var(--primary-container);
+}
+
+.pipeline-step.completed .pipeline-step-bullet {
+    background-color: var(--tertiary);
+    border-color: var(--tertiary-container);
+}
+
+.pipeline-step.completed .pipeline-step-bullet::after {
+    content: 'check';
+    font-family: 'Material Symbols Outlined';
+    font-size: 12px;
+    color: #ffffff;
+}
+
+.pipeline-step-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 0.125rem;
+    color: var(--on-surface);
+}
+
+.pipeline-step-desc {
+    font-size: 11px;
+    color: var(--on-surface-variant);
+}
+
+/* Simulated performance chart layout (CSS Flex) */
+.performance-chart-bar-container {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--outline-variant);
+}
+
+.performance-chart-bar {
+    flex: 1;
+    background-color: rgba(0, 63, 139, 0.15); /* primary with transparency */
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    transition: all 0.5s ease-out;
+    cursor: pointer;
+}
+
+.performance-chart-bar:hover {
+    background-color: var(--primary-container);
+}
+
+/* Clinical Report Specific styles */
+.print-paper-container {
+    max-width: 850px;
+    margin: 2rem auto;
+    background-color: #ffffff;
+    border: 1px solid var(--outline-variant);
+    padding: 3rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+@media print {
+    body {
+        background-color: #ffffff;
+        color: #000000;
+    }
+    .sidebar, .top-navbar, .no-print {
+        display: none !important;
+    }
+    .main-wrapper {
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+    }
+    .print-paper-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}

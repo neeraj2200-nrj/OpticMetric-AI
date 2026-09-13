@@ -1,0 +1,9 @@
+Django>=5.0.0
+Pillow>=10.0.0
+opencv-python
+numpy
+pandas
+torch
+joblib
+scikit-learn
+segmentation-models-pytorch

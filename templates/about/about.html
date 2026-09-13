@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}OpticMetric AI - Clinical Methodology{% endblock %}
+
+{% block breadcrumbs %}
+    About / Methodology & Pipeline
+{% endblock %}
+
+{% block content %}
+<!-- Section: Introduction -->
+<div class="row mb-5">
+    <div class="col-md-9">
+        <h2 class="font-display-lg" style="font-size: 26px; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem;">Technical Framework</h2>
+        <p class="text-muted" style="font-size: 15px; line-height: 1.6;">
+            OpticMetric AI utilizes a multi-stage deep learning pipeline for automated glaucoma screening, designed to assist ophthalmologists with high-precision segmentation and robust diagnostic classification.
+        </p>
+    </div>
+</div>
+
+<!-- Bento Grid: Clinical Cards -->
+<div class="row g-4 mb-5">
+    <!-- Card 1: Dataset -->
+    <div class="col-md-6 col-lg-3">
+        <div class="clinical-card h-100 mb-0 d-flex flex-column">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
+                <span class="material-symbols-outlined" style="font-size: 24px;">database</span>
+            </div>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">1. Dataset (REFUGE)</h4>
+            <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
+                Utilizes the <strong>REFUGE Dataset</strong> (Retinal Fundus Glaucoma Challenge), providing a standardized cohort of gold-standard annotations for training segmentation and Logistic Regression classification tasks.
+            </p>
+            <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
+                <span>IMAGES</span>
+                <span class="text-dark font-weight-bold">1200+ Scans</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card 2: Segmentation (U-Net) -->
+    <div class="col-md-6 col-lg-3">
+        <div class="clinical-card h-100 mb-0 d-flex flex-column">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
+                <span class="material-symbols-outlined" style="font-size: 24px;">grid_view</span>
+            </div>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">2. U-Net Segmentation</h4>
+            <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
+                Dual deep U-Net architectures process the fundus scans. Model 1 isolates the optic disc contour, and Model 2 maps the optic cup perimeter, enabling spatial metric analysis.
+            </p>
+            <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
+                <span>CHANNELS</span>
+                <span class="text-dark font-weight-bold">Dual Model</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card 3: Classification (Logistic Regression) -->
+    <div class="col-md-6 col-lg-3">
+        <div class="clinical-card h-100 mb-0 d-flex flex-column">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
+                <span class="material-symbols-outlined" style="font-size: 24px;">monitoring</span>
+            </div>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">3. Logistic Regression Model</h4>
+            <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
+                A trained Logistic Regression classifier evaluates geometric characteristics (VCDR, HCDR, Disc/Cup Area, and ISNT values) to categorize patient status as Normal or Glaucoma.
+            </p>
+            <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
+                <span>ALGORITHM</span>
+                <span class="text-dark font-weight-bold">Logistic Regression</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card 4: Reports (Outputs) -->
+    <div class="col-md-6 col-lg-3">
+        <div class="clinical-card h-100 mb-0 d-flex flex-column">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
+                <span class="material-symbols-outlined" style="font-size: 24px;">description</span>
+            </div>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">4. Clinical Output</h4>
+            <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
+                Generates hospital-compliant diagnostic sheets. Outputs exact area and VCDR values alongside overlays to enable review and printing of ophthalmic patient records.
+            </p>
+            <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
+                <span>EXPORT</span>
+                <span class="text-dark font-weight-bold">Print & PDF</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Pipeline Visualization Flowchart -->
+<div class="clinical-card">
+    <div class="clinical-card-header mb-4">
+        <h3 class="clinical-card-title d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-primary">visibility</span>
+            <span>Pipeline Visualization Flow</span>
+        </h3>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Step 1: Input -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded text-center bg-light">
+                <div class="clinical-scan-container mb-3" style="aspect-ratio: 4 / 3;">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn-ZQ3zz12Zu2dG7Q6D7iWVlpNSf1p1ALl4_h9c5Jgcu8lcba2Ny4XJEYWf_X2EQdW3o6rTUdsVDWvAu2_q08uVb-7b2so1Bigh8Q3hUfZD0QJ5enYi3PbQ4HDsXeojuW_01OKS04g53wgjXaYkoZADMo-oJD2ZxEYs3eCpjzTqJ84NZc1HC8Ll9prexyDAgNEBohmrpYk8DRWMt4105d40Wz8YJmlOznKmHpaj5zzCc5wf6Q8nYIAiw" alt="RawScan" class="clinical-scan-image"/>
+                    <div class="position-absolute top-0 start-0 m-2 px-2 py-1 bg-dark text-white rounded text-uppercase" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em; background-color: rgba(9, 14, 28, 0.7) !important;">1. Raw scan</div>
+                </div>
+                <h5 class="mb-1" style="font-size: 13px; font-weight: 600;">Fundus Acquisition</h5>
+                <p class="text-muted m-0" style="font-size: 11px;">Input resolution checks and histogram preparation.</p>
+            </div>
+        </div>
+        
+        <!-- Step 2: Processing -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded text-center bg-light">
+                <div class="clinical-scan-container mb-3" style="aspect-ratio: 4 / 3;">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcI6Gnmu-KWDVTPZAQsu0hL8v5u1vSZOuQEHAQ_tRX1f-8kZvhVeFd8QfAc2Qs-D4f5WKMlRzxqqrdd_pCCVH2nFRydSHcH3HW6Z7KNdid0y5McZkex2DZHjjR1YkT1XAEXs55Skqs1rhn-KV7f16kmTlTlrPRuFZn69vWswwf_yvkLZy_ZK63UVodEnMK4G9vKGKH9TXjokRU9pMIPMxlTzl3n3ELlMRXxVcxEM8oxfHSVY4X5RmLYg" alt="Segmentation preview" class="clinical-scan-image"/>
+                    <div class="position-absolute top-0 start-0 m-2 px-2 py-1 bg-primary text-white rounded text-uppercase" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em; background-color: var(--primary) !important;">2. U-Net boundaries</div>
+                </div>
+                <h5 class="mb-1" style="font-size: 13px; font-weight: 600;">Ocular Segmentation</h5>
+                <p class="text-muted m-0" style="font-size: 11px;">Model masks for Disc (Yellow) and Cup (Cyan).</p>
+            </div>
+        </div>
+        
+        <!-- Step 3: Output -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light h-100 d-flex flex-column justify-content-between">
+                <div style="font-size: 12px; line-height: 1.4;">
+                    <div class="pb-2 border-bottom mb-2">
+                        <span class="text-muted text-uppercase d-block" style="font-size: 9px; font-weight: 700;">Reference Metric</span>
+                        <span class="font-mono-data text-primary font-weight-bold" style="font-size: 16px;">VCDR: 0.68</span>
+                    </div>
+                    <div class="pb-2 border-bottom mb-2">
+                        <span class="text-muted text-uppercase d-block" style="font-size: 9px; font-weight: 700;">Pathological Diagnosis</span>
+                        <span class="font-weight-bold text-danger">Suspected Glaucoma</span>
+                    </div>
+                    <div>
+                        <span class="text-muted text-uppercase d-block" style="font-size: 9px; font-weight: 700;">Clinical Compliance</span>
+                        <span class="font-weight-bold text-success">DICOM Validated</span>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="position-absolute top-0 start-0 m-2 px-2 py-1 bg-success text-white rounded text-uppercase" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em; background-color: var(--tertiary) !important;">3. Decision metrics</div>
+                    <a href="{% url 'reports:clinical_report_default' %}" class="btn btn-outline-primary btn-sm w-100 font-weight-bold" style="font-size: 11px;">
+                        Open clinical report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

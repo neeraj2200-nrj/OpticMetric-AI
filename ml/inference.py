@@ -125,13 +125,11 @@ def run_inference(image_path):
         # 7. Feature Extraction
         features = extract_features(clean_disc, clean_cup)
         
-        # 8. Logistic Regression Classification
-        clf_results = classify_features(features)
+        # 8. 5-Classifier Glaucoma Prediction System Classification
+        from .classification.classifier import classify_features_all
+        clf_results = classify_features_all(features)
         diagnosis = clf_results.get("diagnosis")
         confidence = clf_results.get("confidence")
-        normal_probability = clf_results.get("normal_probability")
-        glaucoma_probability = clf_results.get("glaucoma_probability")
-        feature_importances = clf_results.get("feature_importances")
         
         # Log successful inference
         run_time = time.time() - start_time
@@ -158,9 +156,10 @@ def run_inference(image_path):
             'rim_ratio': features[10],
             'diagnosis': diagnosis,
             'confidence': confidence,
-            'normal_probability': normal_probability,
-            'glaucoma_probability': glaucoma_probability,
-            'feature_importances': feature_importances,
+            'models': clf_results.get('models'),
+            'majority_voting': clf_results.get('majority_voting'),
+            'primary_model': clf_results.get('primary_model'),
+            'probability_aggregation': clf_results.get('probability_aggregation'),
             'error': None
         }
         
@@ -187,8 +186,9 @@ def run_inference(image_path):
             'rim_ratio': None,
             'diagnosis': 'Error',
             'confidence': None,
-            'normal_probability': None,
-            'glaucoma_probability': None,
-            'feature_importances': None,
+            'models': None,
+            'majority_voting': None,
+            'primary_model': None,
+            'probability_aggregation': None,
             'error': str(e)
         }

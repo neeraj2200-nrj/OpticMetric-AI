@@ -18,7 +18,7 @@
             </div>
             
             <p class="text-muted mb-4" style="font-size: 13px;">
-                Upload a high-resolution retinal fundus scan (PNG, JPG, or DICOM) to execute the automated glaucoma segmentation and diagnostic metrics pipeline.
+                Upload a high-resolution retinal fundus scan (PNG or JPG) and fill in patient details to execute the 5-Classifier Glaucoma Prediction pipeline.
             </p>
             
             <!-- Upload Form -->
@@ -45,7 +45,8 @@
                     </div>
                 </div>
 
-                <label for="fundus_image_input" class="w-100">
+                <!-- File Upload Drop Zone -->
+                <label for="fundus_image_input" class="w-100 mb-3" style="cursor: pointer;">
                     <div class="clinical-upload-zone" id="drop-zone">
                         <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px; color: var(--primary);">
                             <span class="material-symbols-outlined" style="font-size: 32px;">upload_file</span>
@@ -56,24 +57,24 @@
                         <input type="file" name="fundus_image" id="fundus_image_input" accept="image/*" class="d-none" required/>
                     </div>
                 </label>
+
+                <!-- Live Acquisition Preview & Action Container -->
+                <div class="mt-4 d-none" id="preview-container">
+                    <div class="clinical-card-header mt-3 py-2 border-bottom">
+                        <h3 class="clinical-card-title" style="font-size: 13px;">Acquisition Preview</h3>
+                    </div>
+                    <div class="clinical-scan-container mb-3" style="max-height: 380px;">
+                        <img id="preview-image" src="" alt="Fundus Preview" class="clinical-scan-image"/>
+                    </div>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 p-3 bg-light border rounded-2">
+                        <span id="preview-file-info" class="font-mono-data text-muted truncate" style="font-size: 12px;">File name</span>
+                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2" id="analyze-btn" style="font-size: 13px; font-weight: 600; min-width: 240px;">
+                            <span class="material-symbols-outlined style-icon" style="font-size: 20px;">play_arrow</span>
+                            <span>Initiate AI Analysis Pipeline</span>
+                        </button>
+                    </div>
+                </div>
             </form>
-            
-            <!-- Live Preview Container (Hidden by default) -->
-            <div class="mt-4 d-none" id="preview-container">
-                <div class="clinical-card-header mt-4">
-                    <h3 class="clinical-card-title">Acquisition Preview</h3>
-                </div>
-                <div class="clinical-scan-container mb-3" style="max-height: 400px;">
-                    <img id="preview-image" src="" alt="Fundus Preview" class="clinical-scan-image"/>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span id="preview-file-info" class="font-mono-data text-muted" style="font-size: 12px;">File name</span>
-                    <button type="submit" form="upload-form" class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2" id="analyze-btn">
-                        <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                        <span style="font-weight: 600;">Initiate AI Analysis Pipeline</span>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
     
@@ -116,8 +117,8 @@
                 </li>
                 <li class="pipeline-step" id="step-classifier">
                     <div class="pipeline-step-bullet"></div>
-                    <div class="pipeline-step-title">Logistic Regression Classification</div>
-                    <div class="pipeline-step-desc">Glaucoma pathology prediction and risk classification.</div>
+                    <div class="pipeline-step-title">5-Classifier Glaucoma Prediction</div>
+                    <div class="pipeline-step-desc">Parallel model inference: Logistic Regression, SVM, XGBoost, MLP, and Extra Trees.</div>
                 </li>
                 <li class="pipeline-step" id="step-report">
                     <div class="pipeline-step-bullet"></div>
@@ -132,90 +133,119 @@
 
 {% block extra_js %}
 <script>
-    // Live acquisition preview and pipeline UI state toggles
-    const input = document.getElementById('fundus_image_input');
-    const previewContainer = document.getElementById('preview-container');
-    const previewImage = document.getElementById('preview-image');
-    const fileInfo = document.getElementById('preview-file-info');
-    const dropZone = document.getElementById('drop-zone');
-    const form = document.getElementById('upload-form');
-    
-    // Preview image on selection
-    input.addEventListener('change', function() {
-        showPreview(this.files[0]);
-    });
-    
-    // Drag & Drop event bindings
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--primary)';
-        dropZone.style.backgroundColor = 'var(--surface-container-low)';
-    });
-    
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.style.borderColor = 'var(--outline-variant)';
-        dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
-    });
-    
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--outline-variant)';
-        dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
-        if (e.dataTransfer.files.length) {
-            input.files = e.dataTransfer.files;
-            showPreview(e.dataTransfer.files[0]);
-        }
-    });
+    document.addEventListener("DOMContentLoaded", function() {
+        const input = document.getElementById('fundus_image_input');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const fileInfo = document.getElementById('preview-file-info');
+        const dropZone = document.getElementById('drop-zone');
+        const form = document.getElementById('upload-form');
 
-    function showPreview(file) {
-        if (file) {
+        if (input) {
+            input.addEventListener('change', handleFileSelect);
+        }
+
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--primary)';
+                    dropZone.style.backgroundColor = 'var(--surface-container-low)';
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--outline-variant)';
+                    dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--outline-variant)';
+                dropZone.style.backgroundColor = 'var(--surface-container-lowest)';
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    input.files = files;
+                    handleFileSelect();
+                }
+            });
+        }
+
+        function handleFileSelect() {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                previewContainer.classList.remove('d-none');
-                fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                if (previewImage) previewImage.src = e.target.result;
+                if (fileInfo) fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
                 
-                // Mark upload step as active / complete
+                if (previewContainer) {
+                    previewContainer.classList.remove('d-none');
+                    previewContainer.style.display = 'block';
+                }
+                
+                // Update step status
                 const uploadStep = document.getElementById('step-upload');
-                uploadStep.classList.add('active');
-                uploadStep.querySelector('.pipeline-step-desc').textContent = "Fundus scan loaded. Ready to run analysis pipeline.";
-            }
+                if (uploadStep) {
+                    uploadStep.classList.remove('active');
+                    uploadStep.classList.add('completed');
+                    const desc = uploadStep.querySelector('.pipeline-step-desc');
+                    if (desc) desc.textContent = "Fundus scan loaded. Ready to run analysis pipeline.";
+                }
+            };
             reader.readAsDataURL(file);
         }
-    }
 
-    // Trigger visual simulation steps before final POST submit to give premium clinical workstation feel
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const steps = [
-            { id: 'step-upload', label: 'Image uploaded to local cache.', delay: 300 },
-            { id: 'step-clahe', label: 'CLAHE enhancement completed. Local features equalized.', delay: 700 },
-            { id: 'step-disc', label: 'U-Net Disc segmentation model successfully executed.', delay: 1100 },
-            { id: 'step-cup', label: 'U-Net Cup segmentation model successfully executed.', delay: 1500 },
-            { id: 'step-features', label: 'Extracted neuroretinal rim width and VCDR metric.', delay: 1900 },
-            { id: 'step-classifier', label: 'Logistic Regression predictor completed.', delay: 2300 },
-            { id: 'step-report', label: 'Clinical report compiled. Routing workstation...', delay: 2700 }
-        ];
-
-        document.getElementById('analyze-btn').disabled = true;
-        document.getElementById('analyze-btn').textContent = "Processing Ocular Scans...";
-
-        steps.forEach((step, idx) => {
-            setTimeout(() => {
-                const el = document.getElementById(step.id);
-                el.classList.remove('active');
-                el.classList.add('completed');
-                el.querySelector('.pipeline-step-desc').textContent = step.label;
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                // Active next step
-                if (idx < steps.length - 1) {
-                    document.getElementById(steps[idx+1].id).classList.add('active');
-                } else {
-                    // Submit form at last step
-                    form.submit();
+                // Validate HTML5 inputs
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
                 }
-            }, step.delay);
-        });
+                
+                const btn = document.getElementById('analyze-btn');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing Ocular Scans...`;
+                }
+
+                const steps = [
+                    { id: 'step-upload', label: 'Image uploaded to local cache.', delay: 300 },
+                    { id: 'step-clahe', label: 'CLAHE enhancement completed. Local features equalized.', delay: 700 },
+                    { id: 'step-disc', label: 'ResNet34 U-Net Disc segmentation model v3 executed.', delay: 1100 },
+                    { id: 'step-cup', label: 'ResNet34 U-Net Cup segmentation model v4 executed.', delay: 1500 },
+                    { id: 'step-features', label: 'Extracted 11 geometric features and VCDR metric.', delay: 1900 },
+                    { id: 'step-classifier', label: '5-Classifier model inference completed (LR, SVM, XGBoost, MLP, Extra Trees).', delay: 2300 },
+                    { id: 'step-report', label: 'Clinical report compiled. Routing workstation...', delay: 2700 }
+                ];
+
+                steps.forEach((step, idx) => {
+                    setTimeout(() => {
+                        const el = document.getElementById(step.id);
+                        if (el) {
+                            el.classList.remove('active');
+                            el.classList.add('completed');
+                            const desc = el.querySelector('.pipeline-step-desc');
+                            if (desc) desc.textContent = step.label;
+                        }
+                        
+                        if (idx < steps.length - 1) {
+                            const nextEl = document.getElementById(steps[idx+1].id);
+                            if (nextEl) nextEl.classList.add('active');
+                        } else {
+                            form.submit();
+                        }
+                    }, step.delay);
+                });
+            });
+        }
     });
 </script>
 {% endblock %}

@@ -43,30 +43,30 @@
             <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
                 <span class="material-symbols-outlined" style="font-size: 24px;">grid_view</span>
             </div>
-            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">2. U-Net Segmentation</h4>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">2. ResNet34 U-Net Segmentation</h4>
             <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
-                Dual deep U-Net architectures process the fundus scans. Model 1 isolates the optic disc contour, and Model 2 maps the optic cup perimeter, enabling spatial metric analysis.
+                Dual deep ResNet34 U-Net architectures process 512×512 fundus scans. Disc model v3 isolates optic disc contours, and Cup model v4 maps optic cup perimeters for 11-feature extraction.
             </p>
             <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
-                <span>CHANNELS</span>
-                <span class="text-dark font-weight-bold">Dual Model</span>
+                <span>MODELS</span>
+                <span class="text-dark font-weight-bold">Disc v3 / Cup v4</span>
             </div>
         </div>
     </div>
     
-    <!-- Card 3: Classification (Logistic Regression) -->
+    <!-- Card 3: Classification (5-Classifier System) -->
     <div class="col-md-6 col-lg-3">
         <div class="clinical-card h-100 mb-0 d-flex flex-column">
             <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-4" style="width: 44px; height: 44px; color: var(--primary);">
                 <span class="material-symbols-outlined" style="font-size: 24px;">monitoring</span>
             </div>
-            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">3. Logistic Regression Model</h4>
+            <h4 class="mb-3" style="font-size: 15px; font-weight: 600;">3. 5-Classifier System</h4>
             <p class="text-muted flex-grow-1" style="font-size: 13px; line-height: 1.5;">
-                A trained Logistic Regression classifier evaluates geometric characteristics (VCDR, HCDR, Disc/Cup Area, and ISNT values) to categorize patient status as Normal or Glaucoma.
+                Evaluates the extracted 11-feature vector across 5 trained classifiers: Logistic Regression, SVM, XGBoost, MLP, and Extra Trees, with 4 user-selectable prediction filter modes.
             </p>
             <div class="border-top pt-3 mt-3 d-flex justify-content-between align-items-center font-mono-data text-muted" style="font-size: 11px;">
-                <span>ALGORITHM</span>
-                <span class="text-dark font-weight-bold">Logistic Regression</span>
+                <span>ALGORITHMS</span>
+                <span class="text-dark font-weight-bold">5 Models / 4 Filters</span>
             </div>
         </div>
     </div>

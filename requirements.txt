@@ -6,4 +6,5 @@ pandas
 torch
 joblib
 scikit-learn
+xgboost
 segmentation-models-pytorch

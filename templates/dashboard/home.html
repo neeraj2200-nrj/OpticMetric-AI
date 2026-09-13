@@ -62,28 +62,34 @@
     <!-- Left Section: Performance Chart -->
     <div class="col-lg-8">
         <div class="clinical-card h-100 mb-0">
-            <div class="clinical-card-header">
-                <h3 class="clinical-card-title">Workstation Scan Load</h3>
-                <span class="text-muted" style="font-size: 11px;">Hourly performance logs</span>
+            <div class="clinical-card-header d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h3 class="clinical-card-title">Workstation Scan Load</h3>
+                    <span class="text-muted" style="font-size: 11px;">Live database scan activity</span>
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 10px; font-weight: 700;">
+                    ACTIVE DATASTREAM
+                </span>
             </div>
             
-            <!-- Simulated bar chart -->
+            <!-- Functional Data-Driven Bar Chart -->
             <div class="performance-chart-bar-container">
-                <div class="performance-chart-bar" style="height: 60%;" title="08:00 - 4 scans"></div>
-                <div class="performance-chart-bar" style="height: 80%;" title="09:00 - 8 scans"></div>
-                <div class="performance-chart-bar" style="height: 75%;" title="10:00 - 7 scans"></div>
-                <div class="performance-chart-bar" style="height: 90%;" title="11:00 - 9 scans"></div>
-                <div class="performance-chart-bar" style="height: 85%;" title="12:00 - 8 scans"></div>
-                <div class="performance-chart-bar" style="height: 95%;" title="13:00 - 10 scans"></div>
-                <div class="performance-chart-bar" style="height: 70%;" title="14:00 - 7 scans"></div>
-                <div class="performance-chart-bar" style="height: 82%;" title="15:00 - 8 scans"></div>
-                <div class="performance-chart-bar" style="height: 88%;" title="16:00 - 8 scans"></div>
-                <div class="performance-chart-bar" style="height: 92%;" title="17:00 - 9 scans"></div>
+                {% for item in activity_data %}
+                    <div class="performance-chart-bar" style="height: {{ item.pct }}%;" title="{{ item.label }}: {{ item.count }} scan(s)"></div>
+                {% endfor %}
             </div>
             <div class="d-flex justify-content-between mt-2 font-mono-data text-muted" style="font-size: 11px;">
-                <span>08:00 AM</span>
-                <span>12:00 PM</span>
-                <span>05:00 PM</span>
+                {% if activity_data %}
+                    <span>{{ activity_data.0.label }}</span>
+                    {% with count=activity_data|length last_item=activity_data|last %}
+                        {% if count > 2 %}
+                            <span>Activity Timeline</span>
+                        {% endif %}
+                        <span>{{ last_item.label }}</span>
+                    {% endwith %}
+                {% else %}
+                    <span>No Scan Activity</span>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -23,6 +23,7 @@
 
     <!-- Sidebar Layout -->
     {% include 'includes/sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
     <!-- Top Navbar -->
     {% include 'includes/navbar.html' %}
@@ -46,9 +47,27 @@
                     {% csrf_token %}
                     <div class="modal-body py-4">
                         <!-- Doctor Name -->
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="doctor_name" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Doctor Name</label>
                             <input type="text" class="form-control form-control-sm" id="doctor_name" name="name" value="{{ clinician.name }}" required style="font-size: 13px;">
+                        </div>
+
+                        <!-- Hospital / Facility Name -->
+                        <div class="mb-3">
+                            <label for="facility_name" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Hospital / Facility Name</label>
+                            <input type="text" class="form-control form-control-sm" id="facility_name" name="facility_name" value="{{ clinician.facility_name }}" required style="font-size: 13px;">
+                        </div>
+
+                        <!-- Department Name -->
+                        <div class="mb-3">
+                            <label for="department_name" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Department Name</label>
+                            <input type="text" class="form-control form-control-sm" id="department_name" name="department_name" value="{{ clinician.department_name }}" required style="font-size: 13px;">
+                        </div>
+
+                        <!-- Clinical Lab / Unit Details -->
+                        <div class="mb-4">
+                            <label for="lab_details" class="form-label text-muted text-uppercase" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Lab / Unit Details</label>
+                            <input type="text" class="form-control form-control-sm" id="lab_details" name="lab_details" value="{{ clinician.lab_details }}" required style="font-size: 13px;">
                         </div>
                         
                         <!-- Profile Picture Upload & Delete -->

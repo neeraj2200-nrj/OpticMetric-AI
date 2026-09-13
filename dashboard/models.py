@@ -2,6 +2,9 @@ from django.db import models
 
 class Clinician(models.Model):
     name = models.CharField(max_length=100, default="Dr. Sarah Jenkins")
+    facility_name = models.CharField(max_length=150, default="St. Jude Medical Center")
+    department_name = models.CharField(max_length=150, default="Ophthalmology Department")
+    lab_details = models.CharField(max_length=150, default="Clinical Analysis Lab #4-B")
     profile_picture = models.ImageField(upload_to="profile_pics/", blank=True, null=True)
 
     @property

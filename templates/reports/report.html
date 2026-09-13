@@ -36,7 +36,7 @@
     <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4" style="border-color: #000000 !important; border-width: 2px !important;">
         <div>
             <h2 class="m-0 text-primary" style="font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em;">OpticMetric AI Clinical Report</h2>
-            <p class="text-muted m-0 mt-1" style="font-size: 11px;">Automated Ophthalmology Assessment System v2.4.1</p>
+            <p class="text-muted m-0 mt-1" style="font-size: 11px;">5-Classifier Glaucoma Prediction System v2.0</p>
             <div class="d-flex gap-4 mt-3" style="font-size: 11px;">
                 <div>
                     <span class="text-muted text-uppercase d-block" style="font-size: 9px; font-weight: 600;">Report ID</span>
@@ -53,13 +53,13 @@
             </div>
         </div>
         <div class="text-end" style="font-size: 12px; line-height: 1.4;">
-            <p class="m-0 font-weight-bold text-dark">St. Jude Medical Center</p>
-            <p class="m-0 text-muted">Ophthalmology Department</p>
-            <p class="m-0 text-muted">Clinical Analysis Lab #4-B</p>
+            <p class="m-0 font-weight-bold text-dark">{{ clinician.facility_name }}</p>
+            <p class="m-0 text-muted">{{ clinician.department_name }}</p>
+            <p class="m-0 text-muted">{{ clinician.lab_details }}</p>
         </div>
     </div>
     
-    <!-- Patient Profile (Table grid) -->
+    <!-- Patient Profile -->
     <div class="row g-3 p-3 bg-light border mb-4" style="border-radius: var(--radius-md); font-size: 13px;">
         <div class="col-sm-3 col-6">
             <span class="text-muted text-uppercase d-block" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Patient Name</span>
@@ -106,8 +106,9 @@
         <!-- Overlay Segmentations -->
         <div class="col-6">
             <div class="p-2 border bg-light text-center" style="border-radius: var(--radius-md);">
-                <div class="text-start pb-2 border-bottom mb-2 px-1">
+                <div class="text-start pb-2 border-bottom mb-2 px-1 d-flex justify-content-between align-items-center">
                     <span class="text-uppercase text-primary" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">AI Boundary Segmentation</span>
+                    <span style="font-size: 9px; font-weight: 600; color: var(--outline);">Disc v3 / Cup v4</span>
                 </div>
                 <div class="clinical-scan-container" style="border: 1px solid var(--outline-variant); aspect-ratio: 4 / 3;">
                     {% if is_completed %}
@@ -116,7 +117,6 @@
                         <div class="pending-placeholder-mask" style="background-color: var(--surface-container-low);">
                             <span class="material-symbols-outlined">layers_clear</span>
                             <p class="m-0 font-weight-bold" style="font-size: 12px; color: var(--on-surface-variant);">Overlays Unavailable</p>
-                            <span class="text-uppercase" style="font-size: 9px; color: var(--outline); margin-top: 4px;">Pending ML Integration</span>
                         </div>
                     {% endif %}
                 </div>
@@ -124,9 +124,57 @@
         </div>
     </div>
     
+    <!-- 5-Classifier System Results Breakdown -->
+    {% if is_completed and clf_results %}
+        <div class="mb-4">
+            <h4 class="pb-2 border-bottom" style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--on-surface-variant);">
+                5-Classifier Prediction System Breakdown
+            </h4>
+            <table class="table table-bordered table-sm align-middle" style="font-size: 12px;">
+                <thead>
+                    <tr class="table-light">
+                        <th>Classifier Algorithm</th>
+                        <th>Model Prediction</th>
+                        <th class="text-end">Glaucoma Risk</th>
+                        <th class="text-end">Model Score / Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in clf_results.models %}
+                        <tr>
+                            <td class="font-weight-bold">{{ m.name }}</td>
+                            <td>
+                                {% if m.prediction == 1 %}
+                                    <span class="text-danger font-weight-bold">Glaucoma</span>
+                                {% else %}
+                                    <span class="text-success font-weight-bold">Normal</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end font-mono-data">{{ m.glaucoma_probability|stringformat:".1f" }}%</td>
+                            <td class="text-end font-mono-data">{{ m.confidence|stringformat:".1f" }}%</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="table-secondary font-weight-bold">
+                        <td>Majority Voting Consensus</td>
+                        <td colspan="2">{{ clf_results.majority_voting.vote_text }}</td>
+                        <td class="text-end font-mono-data">{{ clf_results.majority_voting.diagnosis }}</td>
+                    </tr>
+                    <tr class="table-secondary font-weight-bold">
+                        <td>Probability Aggregation</td>
+                        <td colspan="2">Aggregated Model Score (Avg 5 Probabilities)</td>
+                        <td class="text-end font-mono-data">{{ clf_results.probability_aggregation.aggregated_score|stringformat:".1f" }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="text-muted mt-1" style="font-size: 10px; font-style: italic;">
+                Note: Aggregated model scores and majority voting outputs serve as AI decision-support aids. They are not a replacement for independent clinical evaluation by an ophthalmologist.
+            </p>
+        </div>
+    {% endif %}
+
     <!-- Measurements Table -->
     <div class="mb-4">
-        <h4 class="pb-2 border-bottom" style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--on-surface-variant);">Quantitative Clinical Metrics</h4>
+        <h4 class="pb-2 border-bottom" style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--on-surface-variant);">Quantitative Ocular Metrics</h4>
         <div class="table-responsive">
             <table class="table table-bordered table-sm align-middle" style="font-size: 12px;">
                 <thead>
@@ -141,46 +189,30 @@
                     <tr>
                         <td class="font-weight-bold">Optic Disc Area</td>
                         <td class="text-end font-mono-data text-dark">
-                            {% if is_completed %}{{ analysis.disc_area|stringformat:".0f" }} pixels{% else %}--{% endif %}
+                            {% if is_completed %}{{ analysis.disc_area|stringformat:".0f" }} px{% else %}--{% endif %}
                         </td>
                         <td class="text-end text-muted">--</td>
-                        <td>
-                            {% if is_completed %}
-                                <span class="text-success font-weight-bold">Standard reference area</span>
-                            {% else %}
-                                <span class="text-muted">Pending ML integration</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="text-success font-weight-bold">Standard reference area</span></td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Optic Cup Area</td>
                         <td class="text-end font-mono-data text-dark">
-                            {% if is_completed %}{{ analysis.cup_area|stringformat:".0f" }} pixels{% else %}--{% endif %}
+                            {% if is_completed %}{{ analysis.cup_area|stringformat:".0f" }} px{% else %}--{% endif %}
                         </td>
                         <td class="text-end text-muted">--</td>
-                        <td>
-                            {% if is_completed %}
-                                <span class="text-success font-weight-bold">Standard reference area</span>
-                            {% else %}
-                                <span class="text-muted">Pending ML integration</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="text-success font-weight-bold">Standard reference area</span></td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Neuroretinal Rim Area</td>
                         <td class="text-end font-mono-data text-dark">
-                            {% if is_completed %}{{ analysis.rim_area|stringformat:".0f" }} pixels{% else %}--{% endif %}
+                            {% if is_completed %}{{ analysis.rim_area|stringformat:".0f" }} px{% else %}--{% endif %}
                         </td>
                         <td class="text-end text-muted">--</td>
                         <td>
-                            {% if is_completed %}
-                                {% if analysis.rim_area > 0 %}
-                                    <span class="text-success font-weight-bold">Rim presence detected</span>
-                                {% else %}
-                                    <span class="text-danger font-weight-bold">Severe rim thinning</span>
-                                {% endif %}
+                            {% if is_completed and analysis.rim_area > 0 %}
+                                <span class="text-success font-weight-bold">Rim presence detected</span>
                             {% else %}
-                                <span class="text-muted">Pending ML integration</span>
+                                <span class="text-danger font-weight-bold">Severe rim thinning</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -198,7 +230,7 @@
                                     <span class="text-danger font-weight-bold">Exceeds physiological limit</span>
                                 {% endif %}
                             {% else %}
-                                <span class="text-muted">Pending ML integration</span>
+                                <span class="text-muted">Pending</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -208,13 +240,7 @@
                             {% if is_completed %}{{ analysis.hcdr|stringformat:".3f" }}{% else %}--{% endif %}
                         </td>
                         <td class="text-end text-muted">--</td>
-                        <td>
-                            {% if is_completed %}
-                                <span class="text-success font-weight-bold">Measured successfully</span>
-                            {% else %}
-                                <span class="text-muted">Pending ML integration</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="text-success font-weight-bold">Measured successfully</span></td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Cup-to-Disc Area Ratio (CDAR)</td>
@@ -222,27 +248,7 @@
                             {% if is_completed %}{{ analysis.cdar|stringformat:".3f" }}{% else %}--{% endif %}
                         </td>
                         <td class="text-end text-muted">--</td>
-                        <td>
-                            {% if is_completed %}
-                                <span class="text-success font-weight-bold">Measured successfully</span>
-                            {% else %}
-                                <span class="text-muted">Pending ML integration</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-weight-bold">Logistic Regression Pipeline Confidence</td>
-                        <td class="text-end font-mono-data text-dark">
-                            {% if is_completed %}{{ analysis.confidence|stringformat:".2f" }}%{% else %}--{% endif %}
-                        </td>
-                        <td class="text-end text-muted">&gt; 85.0%</td>
-                        <td>
-                            {% if is_completed %}
-                                <span class="text-success font-weight-bold">Valid prediction confidence</span>
-                            {% else %}
-                                <span class="text-muted">Pending ML integration</span>
-                            {% endif %}
-                        </td>
+                        <td><span class="text-success font-weight-bold">Measured successfully</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -253,10 +259,10 @@
     <div class="row g-3 mb-4">
         <div class="col-md-6">
             <div class="p-3 border h-100" style="border-radius: var(--radius-md);">
-                <span class="text-uppercase text-muted d-block mb-2" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">AI Diagnostic Assessment</span>
+                <span class="text-uppercase text-muted d-block mb-2" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Ensemble Result — 5-Classifier Majority Consensus</span>
                 <p class="m-0 font-weight-bold" style="font-size: 14px;">
                     {% if is_completed %}
-                        {% if analysis.diagnosis == 'Normal' %}
+                        {% if clf_results.majority_voting.diagnosis == 'Normal' %}
                             <span class="text-success">Normal limits detected</span>
                         {% else %}
                             <span class="text-danger">Suspected Glaucoma pathology detected</span>
@@ -266,7 +272,7 @@
                     {% endif %}
                 </p>
                 <div class="mt-2 text-muted" style="font-size: 11px;">
-                    Calculated by the integrated Logistic Regression model trained on the REFUGE validation cohort dataset.
+                    Calculated by the 5-Classifier Glaucoma Prediction System (Logistic Regression, SVM, XGBoost, MLP, Extra Trees).
                 </div>
             </div>
         </div>
@@ -283,8 +289,8 @@
     <!-- Signatures -->
     <div class="d-flex justify-content-between align-items-end mt-5 pt-4 border-top" style="font-size: 12px;">
         <div>
-            <p class="m-0 text-muted">Technical compliance: <strong>DICOM Compliant</strong></p>
-            <p class="m-0 text-muted">Classification algorithm: <strong>Logistic Regression Classifier</strong></p>
+            <p class="m-0 text-muted">Segmentation models: <strong>Disc U-Net v3 / Cup U-Net v4</strong></p>
+            <p class="m-0 text-muted">Classification system: <strong>5-Classifier Glaucoma Prediction System</strong></p>
         </div>
         <div class="text-center" style="width: 200px;">
             <div class="border-bottom pb-4 mb-2" style="height: 30px; font-family: 'Courier New', monospace; font-size: 10px; color: var(--outline);">

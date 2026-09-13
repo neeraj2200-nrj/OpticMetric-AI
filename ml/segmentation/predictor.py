@@ -8,7 +8,7 @@ DEVICE = torch.device("cpu")
 # Resolve model paths dynamically relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DISC_MODEL_PATH = os.path.join(BASE_DIR, 'best_disc_unet_512_v3.pth')
-CUP_MODEL_PATH = os.path.join(BASE_DIR, 'best_cup_unet_512_v3.pth')
+CUP_MODEL_PATH = os.path.join(BASE_DIR, 'best_cup_unet_512_v4.pth')
 
 disc_model = None
 cup_model = None

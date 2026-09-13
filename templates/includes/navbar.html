@@ -1,6 +1,9 @@
 <header class="top-navbar">
-    <div class="d-flex align-items-center gap-3">
-        <h2 class="m-0" style="font-size: 16px; font-weight: 600; color: var(--on-surface);">
+    <div class="d-flex align-items-center gap-2">
+        <button id="sidebarToggleBtn" class="btn btn-link p-1 text-dark d-lg-none border-0 m-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 6px;" aria-label="Open menu" aria-expanded="false" aria-controls="sidebarNav">
+            <span class="material-symbols-outlined" style="font-size: 24px;">menu</span>
+        </button>
+        <h2 class="m-0" style="font-size: 15px; font-weight: 600; color: var(--on-surface);">
             {% block breadcrumbs %}
                 {% if request.resolver_match.app_name == 'dashboard' %}
                     Dashboard

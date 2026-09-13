@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}OpticMetric AI - Model Comparison{% endblock %}
+
+{% block breadcrumbs %}
+    Clinical Workstation / Model Comparison Benchmarks
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="font-display-lg m-0" style="font-size: 24px; color: var(--primary); font-weight: 700;">Model Comparison</h2>
+        <p class="text-muted m-0 mt-1" style="font-size: 13.5px;">Performance evaluation on the unseen REFUGE Validation400 dataset</p>
+    </div>
+    <div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2" style="font-size: 12px; font-weight: 700;">
+            <span class="material-symbols-outlined text-[16px] me-1" style="font-size: 16px; vertical-align: text-bottom;">verified</span>
+            Unseen REFUGE Validation400 Dataset
+        </span>
+    </div>
+</div>
+
+<!-- Main Comparison Table Card -->
+<div class="clinical-card mb-4">
+    <div class="clinical-card-header mb-3 py-1 d-flex justify-content-between align-items-center">
+        <h3 class="clinical-card-title d-flex align-items-center gap-2" style="font-size: 14px; font-weight: 700;">
+            <span class="material-symbols-outlined text-primary">table_chart</span>
+            <span>5-Classifier Benchmark Matrix</span>
+        </h3>
+        <span class="text-muted" style="font-size: 11px;">Evaluated on 400 Unseen Held-Out Retinal Scans</span>
+    </div>
+
+    <!-- Responsive Table Container -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+            <thead>
+                <tr class="table-light" style="font-size: 11.5px; text-transform: uppercase; color: var(--on-surface-variant); border-bottom: 2px solid var(--outline-variant);">
+                    <th class="py-3 ps-3">Algorithm</th>
+                    <th class="py-3 text-end">Accuracy</th>
+                    <th class="py-3 text-end">Precision</th>
+                    <th class="py-3 text-end">Recall</th>
+                    <th class="py-3 text-end">Specificity</th>
+                    <th class="py-3 text-end">F1-Score</th>
+                    <th class="py-3 text-end pe-3">ROC-AUC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in models_data %}
+                    <tr>
+                        <td class="py-3 ps-3 font-weight-bold text-dark">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined text-muted" style="font-size: 18px;">psychology</span>
+                                <span>{{ m.name }}</span>
+                            </div>
+                        </td>
+                        
+                        <!-- Accuracy -->
+                        <td class="py-3 text-end font-mono-data">
+                            {% if m.highlights.accuracy %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest Accuracy Benchmark">
+                                    {{ m.accuracy|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.accuracy|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Precision -->
+                        <td class="py-3 text-end font-mono-data">
+                            {% if m.highlights.precision %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest Precision Benchmark">
+                                    {{ m.precision|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.precision|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Recall -->
+                        <td class="py-3 text-end font-mono-data">
+                            {% if m.highlights.recall %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest Recall Benchmark">
+                                    {{ m.recall|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.recall|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Specificity -->
+                        <td class="py-3 text-end font-mono-data">
+                            {% if m.highlights.specificity %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest Specificity Benchmark">
+                                    {{ m.specificity|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.specificity|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- F1-Score -->
+                        <td class="py-3 text-end font-mono-data">
+                            {% if m.highlights.f1 %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest F1-Score Benchmark">
+                                    {{ m.f1|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.f1|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- ROC-AUC -->
+                        <td class="py-3 text-end pe-3 font-mono-data">
+                            {% if m.highlights.roc_auc %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 12px; font-weight: 700;" title="Highest ROC-AUC Benchmark">
+                                    {{ m.roc_auc|stringformat:".2f" }}% ★
+                                </span>
+                            {% else %}
+                                <span class="text-dark">{{ m.roc_auc|stringformat:".2f" }}%</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Detailed Scientific Interpretation Section -->
+<div class="clinical-card">
+    <div class="clinical-card-header mb-3 py-1">
+        <h3 class="clinical-card-title d-flex align-items-center gap-2" style="font-size: 14px; font-weight: 700; color: var(--primary);">
+            <span class="material-symbols-outlined text-primary">menu_book</span>
+            <span>Clinical Benchmark Analysis & Evaluation</span>
+        </h3>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-12">
+            <p style="font-size: 13.5px; line-height: 1.65; color: var(--on-surface);">
+                The results show that the selected algorithms provide different performance characteristics rather than a single model being superior across every metric. SVM and MLP achieved the highest accuracy of 92.25%, while SVM provided the highest specificity. Logistic Regression achieved the highest recall and ROC-AUC, making it particularly effective at identifying glaucoma cases and distinguishing between the two classes. MLP achieved the highest F1-Score, while Extra Trees also provided a strong balance between precision, recall, and F1-Score.
+            </p>
+            <p style="font-size: 13.5px; line-height: 1.65; color: var(--on-surface);">
+                The difference between the models highlights the importance of considering multiple evaluation metrics in glaucoma detection. Accuracy alone may not adequately represent the ability of a model to detect glaucoma cases, particularly when the number of positive cases is relatively smaller. Therefore, recall, specificity, F1-Score, and ROC-AUC were also considered when comparing the classifiers.
+            </p>
+            <p class="m-0" style="font-size: 13.5px; line-height: 1.65; color: var(--on-surface);">
+                The segmentation stage also produced strong results. The U-Net with ResNet-34 encoder achieved a Dice score of 0.9513 for optic disc segmentation and 0.8734 for optic cup segmentation on the held-out segmentation validation set. The corresponding IoU values were 0.9080 for the disc and 0.7806 for the cup, demonstrating effective segmentation of the optic nerve head structures used for feature extraction.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

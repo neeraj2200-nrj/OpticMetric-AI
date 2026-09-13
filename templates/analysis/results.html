@@ -10,33 +10,35 @@
 {% block content %}
 <!-- Top Section: Patient Metadata -->
 <div class="clinical-card mb-4 py-3">
-    <div class="row align-items-center">
-        <div class="col-md-3 border-end">
+    <div class="row align-items-center g-3">
+        <div class="col-6 col-md-3 border-end">
             <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em;">Active Scan File</span>
-            <p class="m-0 font-weight-bold truncate" style="font-size: 15px; font-weight: 600;">{{ analysis.uploaded_image.name|cut:"uploads/" }}</p>
+            <p class="m-0 font-weight-bold truncate" style="font-size: 14px; font-weight: 600;">{{ analysis.uploaded_image.name|cut:"uploads/" }}</p>
         </div>
-        <div class="col-md-2 border-end text-center text-md-start ps-md-4">
+        <div class="col-6 col-md-2 border-end ps-md-3">
             <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em;">Patient ID / Name</span>
-            <p class="m-0 font-mono-data" style="font-size: 13px; font-weight: 600;">{{ analysis.patient.patient_id }}</p>
+            <p class="m-0 font-mono-data" style="font-size: 12.5px; font-weight: 600;">{{ analysis.patient.patient_id }}</p>
             <p class="m-0 text-muted truncate" style="font-size: 11px;" title="{{ analysis.patient.name }}">{{ analysis.patient.name }}</p>
         </div>
-        <div class="col-md-2 border-end text-center text-md-start ps-md-4">
+        <div class="col-6 col-md-2 border-end ps-md-3">
             <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em;">Demographics</span>
-            <p class="m-0" style="font-size: 13px; font-weight: 500;">
+            <p class="m-0" style="font-size: 12.5px; font-weight: 500;">
                 Age {{ analysis.patient.age }}y / {{ analysis.patient.gender }}
             </p>
         </div>
-        <div class="col-md-3 border-end text-center text-md-start ps-md-4">
+        <div class="col-6 col-md-3 border-end ps-md-3">
             <span class="text-uppercase text-muted" style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em;">Acquisition Stamp</span>
-            <p class="m-0 text-muted" style="font-size: 12px;">{{ analysis.created_at|date:"Y-m-d H:i:s" }}</p>
+            <p class="m-0 text-muted" style="font-size: 11.5px;">{{ analysis.created_at|date:"Y-m-d H:i:s" }}</p>
         </div>
-        <div class="col-md-2 text-center text-md-end">
+        <div class="col-12 col-md-2 text-center text-md-end">
             {% if is_completed %}
-                {% if analysis.diagnosis == 'Normal' %}
-                    <span class="badge-clinical badge-clinical-normal">Normal</span>
-                {% else %}
-                    <span class="badge-clinical badge-clinical-suspected">Suspected Glaucoma</span>
-                {% endif %}
+                <div id="topEnsembleBadgeContainer">
+                    {% if clf_results and clf_results.majority_voting and clf_results.majority_voting.diagnosis == 'Normal' %}
+                        <span class="badge-clinical badge-clinical-normal" title="Ensemble Result: 5-Classifier Majority Consensus">ENSEMBLE: NORMAL</span>
+                    {% else %}
+                        <span class="badge-clinical badge-clinical-suspected" title="Ensemble Result: 5-Classifier Majority Consensus">ENSEMBLE: SUSPECTED GLAUCOMA</span>
+                    {% endif %}
+                </div>
             {% else %}
                 <span class="badge-clinical badge-clinical-pending">Pending ML Inference</span>
             {% endif %}
@@ -44,10 +46,11 @@
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Center Section: 2x2 Image Grid -->
-    <div class="col-lg-8">
-        <div class="row g-3">
+<!-- Top Section: 2x2 Image Grid & Ocular Metrics Side-by-Side -->
+<div class="row g-4 mb-4">
+    <!-- Left Column: 2x2 Image Grid -->
+    <div class="col-lg-7">
+        <div class="row g-3 h-100">
             <!-- 1. Original Fundus -->
             <div class="col-sm-6">
                 <div class="clinical-card p-3 mb-0 h-100">
@@ -61,12 +64,12 @@
                 </div>
             </div>
             
-            <!-- 2. Disc Segmentation -->
+            <!-- 2. Disc Segmentation (v3) -->
             <div class="col-sm-6">
                 <div class="clinical-card p-3 mb-0 h-100">
                     <div class="clinical-card-header py-1 mb-2">
                         <h3 class="clinical-card-title" style="font-size: 12px; color: #fbbf24;">Disc Segmentation</h3>
-                        <span class="badge-clinical" style="font-size: 9px; color: #fbbf24; border-color: #fbbf24;">UNET-V1</span>
+                        <span class="badge-clinical" style="font-size: 9px; color: #fbbf24; border-color: #fbbf24;">DISC UNET-V3</span>
                     </div>
                     <div class="clinical-scan-container">
                         {% if is_completed %}
@@ -83,12 +86,12 @@
                 </div>
             </div>
             
-            <!-- 3. Cup Segmentation -->
+            <!-- 3. Cup Segmentation (v4) -->
             <div class="col-sm-6">
                 <div class="clinical-card p-3 mb-0 h-100">
                     <div class="clinical-card-header py-1 mb-2">
                         <h3 class="clinical-card-title" style="font-size: 12px; color: #22d3ee;">Cup Segmentation</h3>
-                        <span class="badge-clinical" style="font-size: 9px; color: #22d3ee; border-color: #22d3ee;">UNET-V2</span>
+                        <span class="badge-clinical" style="font-size: 9px; color: #22d3ee; border-color: #22d3ee;">CUP UNET-V4</span>
                     </div>
                     <div class="clinical-scan-container">
                         {% if is_completed %}
@@ -127,395 +130,357 @@
                 </div>
             </div>
         </div>
-        
-        <!-- ========================================== -->
-        <!-- CLINICAL ANALYSIS VISUAL DASHBOARD         -->
-        <!-- ========================================== -->
-        {% if is_completed %}
-            <!-- 1. Geometry Summary Cards -->
-            <div class="row g-3 mb-4 mt-2">
-                <div class="col-sm-3 col-6">
-                    <div class="clinical-card p-3 mb-0 h-100">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Disc Diameter</span>
-                        <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 17px; font-weight: 700;">{{ analysis.disc_width }}x{{ analysis.disc_height }} <span style="font-size: 10px; font-weight: 500; color: var(--outline);">px</span></h3>
-                        <p class="m-0 text-muted mt-1" style="font-size: 11px;">Width × Height</p>
+    </div>
+    
+    <!-- Right Column: Diagnostics & Calculated Metrics (Matches left height) -->
+    <div class="col-lg-5">
+        <div class="d-flex flex-column h-100 gap-3">
+            <!-- 1. Clinical Measurements Table -->
+            <div class="clinical-card mb-0 flex-fill d-flex flex-column justify-content-between">
+                <div>
+                    <div class="clinical-card-header py-2 mb-2">
+                        <h3 class="clinical-card-title" style="font-size: 14.5px; font-weight: 700;">Calculated Ocular Metrics</h3>
                     </div>
-                </div>
-                <div class="col-sm-3 col-6">
-                    <div class="clinical-card p-3 mb-0 h-100">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Cup Diameter</span>
-                        <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 17px; font-weight: 700;">{{ analysis.cup_width }}x{{ analysis.cup_height }} <span style="font-size: 10px; font-weight: 500; color: var(--outline);">px</span></h3>
-                        <p class="m-0 text-muted mt-1" style="font-size: 11px;">Width × Height</p>
-                    </div>
-                </div>
-                <div class="col-sm-3 col-6">
-                    <div class="clinical-card p-3 mb-0 h-100">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">HCDR</span>
-                        <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 17px; font-weight: 700;">{{ analysis.hcdr|stringformat:".3f" }}</h3>
-                        <p class="m-0 text-muted mt-1" style="font-size: 11px;">Horizontal C/D</p>
-                    </div>
-                </div>
-                <div class="col-sm-3 col-6">
-                    <div class="clinical-card p-3 mb-0 h-100">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Rim Ratio</span>
-                        <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 17px; font-weight: 700;">{{ analysis.rim_ratio|stringformat:".3f" }}</h3>
-                        <p class="m-0 text-muted mt-1" style="font-size: 11px;">Rim/Disc Area</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 2. Radar Chart & VCDR Risk Gauge -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="clinical-card p-3 h-100 mb-0">
-                        <div class="clinical-card-header mb-3">
-                            <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Clinical Geometry Profile</h3>
-                        </div>
-                        <div style="height: 240px; position: relative;">
-                            <canvas id="radarChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="clinical-card p-3 h-100 mb-0">
-                        <div class="clinical-card-header mb-3">
-                            <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">VCDR Risk Gauge</h3>
-                        </div>
-                        <div class="d-flex flex-column align-items-center justify-content-center" style="height: 240px;">
-                            <div style="width: 200px; height: 100px; position: relative; margin-bottom: 12px;">
-                                <canvas id="vcdrGaugeChart"></canvas>
-                            </div>
-                            <div class="text-center">
-                                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Current VCDR</span>
-                                <h4 class="font-mono-data font-weight-bold text-dark m-0 mt-1" style="font-size: 18px;">{{ analysis.vcdr|stringformat:".3f" }}</h4>
-                                <span class="badge mt-1 text-uppercase" style="font-size: 10px; padding: 4px 8px; font-weight: 600;
-                                                                           {% if risk_level == 'success' %}background-color: var(--bs-success-bg-subtle); color: var(--bs-success); border: 1px solid var(--bs-success-border-subtle);
-                                                                           {% elif risk_level == 'warning' %}background-color: var(--bs-warning-bg-subtle); color: var(--bs-warning); border: 1px solid var(--bs-warning-border-subtle);
-                                                                           {% elif risk_level == 'orange' %}background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa;
-                                                                           {% else %}background-color: var(--bs-danger-bg-subtle); color: var(--bs-danger); border: 1px solid var(--bs-danger-border-subtle);{% endif %}">
-                                    {{ clinical_category }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 3. Area Distribution & Diameter Comparison -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="clinical-card p-3 h-100 mb-0">
-                        <div class="clinical-card-header mb-3">
-                            <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Area Tissue Distribution</h3>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 1.2rem; justify-content: center; height: 210px;">
-                            <div>
-                                <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
-                                    <span class="text-muted font-weight-bold">Optic Disc Area</span>
-                                    <span class="font-mono-data font-weight-bold text-dark">{{ analysis.disc_area|stringformat:".0f" }} px (100%)</span>
-                                </div>
-                                <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
-                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
-                                    <span class="text-muted font-weight-bold">Optic Cup Area</span>
-                                    <span class="font-mono-data font-weight-bold text-dark">{{ analysis.cup_area|stringformat:".0f" }} px ({{ cup_pct|stringformat:".1f" }}%)</span>
-                                </div>
-                                <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
-                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ cup_pct }}%" aria-valuenow="{{ cup_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
-                                    <span class="text-muted font-weight-bold">Neuroretinal Rim Area</span>
-                                    <span class="font-mono-data font-weight-bold text-dark">{{ analysis.rim_area|stringformat:".0f" }} px ({{ rim_pct|stringformat:".1f" }}%)</span>
-                                </div>
-                                <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ rim_pct }}%" aria-valuenow="{{ rim_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="clinical-card p-3 h-100 mb-0">
-                        <div class="clinical-card-header mb-3">
-                            <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Diameter Parameters Comparison</h3>
-                        </div>
-                        <div style="height: 210px; position: relative;">
-                            <canvas id="diameterComparisonChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 4. Clinical Threshold Timeline -->
-            <div class="clinical-card p-3 mb-4">
-                <div class="clinical-card-header mb-3">
-                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Clinical VCDR Threshold Timeline</h3>
-                </div>
-                <div class="py-2 px-1">
-                    <div style="position: relative; height: 20px; margin-bottom: 6px;">
-                        <div style="position: absolute; left: calc({{ analysis.vcdr }} * 100%); transform: translateX(-50%); text-align: center; white-space: nowrap;">
-                            <span class="badge bg-dark font-mono-data" style="font-size: 10.5px; padding: 2px 6px;">{{ analysis.vcdr|stringformat:".3f" }}</span>
-                            <div style="width: 2px; height: 6px; background-color: var(--on-surface); margin: 2px auto 0 auto;"></div>
-                        </div>
-                    </div>
-                    <div class="d-flex" style="height: 12px; border-radius: 6px; overflow: hidden; background-color: var(--outline-variant);">
-                        <div class="bg-success" style="width: 30%;" title="Small physiological cup (0.0 - 0.3)"></div>
-                        <div class="bg-success" style="width: 20%; opacity: 0.85;" title="Normal limits (0.3 - 0.5)"></div>
-                        <div class="bg-warning" style="width: 10%;" title="Borderline (0.5 - 0.6)"></div>
-                        <div class="bg-warning" style="width: 10%; opacity: 0.8;" title="Suspicious (0.6 - 0.7)"></div>
-                        <div class="bg-danger" style="width: 30%;" title="High Risk (0.7 - 1.0)"></div>
-                    </div>
-                    <div class="d-flex justify-content-between mt-2 text-muted" style="font-size: 10px; font-weight: 500; line-height: 1.3;">
-                        <span>0.0<br/><span style="font-weight: 600; color: var(--bs-success);">Normal</span></span>
-                        <span class="text-center">0.3<br/>Physiological</span>
-                        <span class="text-center">0.5<br/><span style="font-weight: 600; color: var(--bs-warning);">Borderline</span></span>
-                        <span class="text-center">0.6<br/><span style="font-weight: 600; color: #ea580c;">Suspicious</span></span>
-                        <span class="text-center">0.7<br/><span style="font-weight: 600; color: var(--bs-danger);">High Risk</span></span>
-                        <span class="text-end">1.0<br/>Severe</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 5. Expanded Feature Importance -->
-            <div class="clinical-card p-3 mb-4">
-                <div class="clinical-card-header mb-3">
-                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Logistic Regression Feature Importances</h3>
-                </div>
-                
-                {% if is_completed and feature_importances %}
+                    
                     <div class="table-responsive">
-                        <table class="table table-sm table-borderless align-middle m-0" style="font-size: 11.5px;">
+                        <table class="table table-borderless align-middle m-0">
                             <thead>
-                                <tr class="text-muted text-uppercase" style="font-size: 8.5px; font-weight: 700; border-bottom: 1px solid var(--outline-variant);">
-                                    <th class="py-2">Classifier Feature Name</th>
-                                    <th class="py-2 text-end" style="width: 90px;">Weight</th>
-                                    <th class="py-2 text-end" style="width: 200px;">Importance Magnitude</th>
+                                <tr class="border-bottom" style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--on-surface-variant);">
+                                    <th class="py-2">Measurement</th>
+                                    <th class="text-end py-2">Value</th>
+                                    <th class="text-end py-2">Reference</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for item in feature_importances %}
-                                    <tr>
-                                        <td class="py-2 font-weight-bold text-dark">{{ item.feature }}</td>
-                                        <td class="py-2 text-end font-mono-data text-muted">{{ item.importance|stringformat:".4f" }}</td>
-                                        <td class="py-2">
-                                            <div class="progress" style="height: 6px; background-color: var(--surface-container-high); border-radius: 3px;">
-                                                <div class="progress-bar bg-primary" role="progressbar" style="width: calc({{ item.importance }} * 400%);" aria-valuenow="{{ item.importance }}" aria-valuemin="0" aria-valuemax="1"></div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                            <tbody style="font-size: 13.5px;">
+                                <tr class="border-bottom">
+                                    <td class="py-2.5 text-muted font-weight-500">Optic Disc Area</td>
+                                    <td class="py-2.5 text-end font-mono-data text-dark font-weight-bold" style="font-size: 14.5px;">
+                                        {% if is_completed %}{{ analysis.disc_area|stringformat:".2f" }} px{% else %}--{% endif %}
+                                    </td>
+                                    <td class="py-2.5 text-end text-muted" style="font-size: 12.5px;">1.5 - 2.5 mm²</td>
+                                </tr>
+                                <tr class="border-bottom">
+                                    <td class="py-2.5 text-muted font-weight-500">Optic Cup Area</td>
+                                    <td class="py-2.5 text-end font-mono-data text-dark font-weight-bold" style="font-size: 14.5px;">
+                                        {% if is_completed %}{{ analysis.cup_area|stringformat:".2f" }} px{% else %}--{% endif %}
+                                    </td>
+                                    <td class="py-2.5 text-end text-muted" style="font-size: 12.5px;">0.1 - 0.9 mm²</td>
+                                </tr>
+                                <tr class="border-bottom">
+                                    <td class="py-2.5 text-muted font-weight-500">VCDR (Cup/Disc)</td>
+                                    <td class="py-2.5 text-end font-mono-data text-dark font-weight-bold" style="font-size: 15px;">
+                                        {% if is_completed %}{{ analysis.vcdr|stringformat:".2f" }}{% else %}--{% endif %}
+                                    </td>
+                                    <td class="py-2.5 text-end text-muted" style="font-size: 12.5px;">&lt; 0.50</td>
+                                </tr>
+                                <tr class="border-bottom">
+                                    <td class="py-2.5 text-muted font-weight-500">Ensemble Consensus</td>
+                                    <td class="py-2.5 text-end font-weight-bold">
+                                        {% if is_completed %}
+                                            {% if clf_results.majority_voting.diagnosis == 'Normal' %}
+                                                <span class="text-success" style="font-size: 14px;">Normal</span>
+                                            {% else %}
+                                                <span class="text-danger" style="font-size: 14px;">Glaucomatous</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted" style="font-size: 14px;">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-2.5 text-end text-muted" style="font-size: 12.5px;">5 Models</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 text-muted font-weight-500">Aggregated Score</td>
+                                    <td class="py-2.5 text-end font-mono-data text-dark font-weight-bold" style="font-size: 14.5px;">
+                                        {% if is_completed %}{{ clf_results.probability_aggregation.aggregated_score|stringformat:".1f" }}%{% else %}--{% endif %}
+                                    </td>
+                                    <td class="py-2.5 text-end text-muted" style="font-size: 12.5px;">Avg 5 Models</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-                {% else %}
-                    <div class="text-center py-4 text-muted border border-dashed rounded" style="font-size: 12px; background-color: var(--background);">
-                        <span class="material-symbols-outlined text-muted mb-2">warning</span>
-                        <p class="m-0">Feature importance unavailable for this classifier.</p>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- 6. Clinical Interpretation Card -->
-            <div class="clinical-card p-3 mb-0">
-                <div class="clinical-card-header mb-3">
-                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Ophthalmic Diagnostic Interpretation</h3>
-                </div>
-                <div class="row g-3">
-                    <div class="col-sm-4 border-end">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">AI Classification</span>
-                        <h4 class="mt-1 font-weight-bold {% if analysis.diagnosis == 'Glaucoma' %}text-danger{% else %}text-success{% endif %}" style="font-size: 16px;">
-                            {{ analysis.diagnosis }}
-                        </h4>
-                        <span class="text-muted font-mono-data mt-1 d-block" style="font-size: 11px;">Confidence: {{ analysis.confidence|stringformat:".1f" }}%</span>
-                    </div>
-                    <div class="col-sm-8 ps-sm-3">
-                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Clinical Recommendation</span>
-                        <p class="m-0 mt-1 text-dark" style="font-size: 12.5px; line-height: 1.45;">{{ recommendation }}</p>
-                    </div>
                 </div>
             </div>
-        {% endif %}
-    </div>
-    
-    <!-- Right Column: Diagnostics & Measurements -->
-    <div class="col-lg-4">
-        <!-- 1. Clinical Measurements Table -->
-        <div class="clinical-card mb-4">
-            <div class="clinical-card-header py-1 mb-3">
-                <h3 class="clinical-card-title">Calculated Metrics</h3>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-sm table-borderless m-0">
-                    <thead>
-                        <tr class="border-bottom" style="font-size: 11px; text-transform: uppercase; color: var(--on-surface-variant);">
-                            <th>Measurement</th>
-                            <th class="text-end">Value</th>
-                            <th class="text-end">Reference</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size: 13px;">
-                        <tr class="border-bottom">
-                            <td class="py-2 text-muted">Optic Disc Area</td>
-                            <td class="py-2 text-end font-mono-data text-dark">
-                                {% if is_completed %}{{ analysis.disc_area|stringformat:".2f" }} mm²{% else %}--{% endif %}
-                            </td>
-                            <td class="py-2 text-end text-muted">1.5 - 2.5 mm²</td>
-                        </tr>
-                        <tr class="border-bottom">
-                            <td class="py-2 text-muted">Optic Cup Area</td>
-                            <td class="py-2 text-end font-mono-data text-dark">
-                                {% if is_completed %}{{ analysis.cup_area|stringformat:".2f" }} mm²{% else %}--{% endif %}
-                            </td>
-                            <td class="py-2 text-end text-muted">0.1 - 0.9 mm²</td>
-                        </tr>
-                        <tr class="border-bottom">
-                            <td class="py-2 text-muted">VCDR (Cup/Disc)</td>
-                            <td class="py-2 text-end font-mono-data text-dark font-weight-bold">
-                                {% if is_completed %}{{ analysis.vcdr|stringformat:".2f" }}{% else %}--{% endif %}
-                            </td>
-                            <td class="py-2 text-end text-muted">&lt; 0.50</td>
-                        </tr>
-                        <tr class="border-bottom">
-                            <td class="py-2 text-muted">Risk Assessment</td>
-                            <td class="py-2 text-end font-weight-bold">
-                                {% if is_completed %}
-                                    {% if analysis.diagnosis == 'Normal' %}
-                                        <span class="text-success">Normal</span>
-                                    {% else %}
-                                        <span class="text-danger">Glaucomatous</span>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="text-muted">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td class="py-2 text-end text-muted">--</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2 text-muted">Prediction Confidence</td>
-                            <td class="py-2 text-end font-mono-data text-dark">
-                                {% if is_completed %}{{ analysis.confidence|stringformat:".2f" }}%{% else %}--{% endif %}
-                            </td>
-                            <td class="py-2 text-end text-muted">&gt; 85.0%</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            {% if not is_completed %}
-                <div class="alert alert-warning border-0 p-3 mt-4 mb-0 d-flex gap-2" style="border-radius: var(--radius-md);">
-                    <span class="material-symbols-outlined text-[20px] flex-shrink-0" style="color: #b45309; font-size: 20px;">warning</span>
-                    <div style="font-size: 11.5px; line-height: 1.4; color: #b45309;">
-                        <strong>Pending ML Integration:</strong> Spatial segmentations and Logistic Regression outputs will be calculated automatically once the inference engine is connected in Phase 2.
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- 2. Logistic Regression Pipeline Probability -->
-        <div class="clinical-card mb-4 mt-4">
-            <div class="clinical-card-header py-1 mb-3">
-                <h3 class="clinical-card-title" style="font-size: 13px;">Logistic Regression Pipeline Probability</h3>
-            </div>
-            
-            {% if is_completed and normal_probability is not None and glaucoma_probability is not None %}
-                <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0;">
-                    <div>
-                        <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
-                            <span class="text-muted font-weight-bold">Normal Limit</span>
-                            <span class="font-mono-data font-weight-bold text-dark">{{ normal_probability|stringformat:".1f" }}%</span>
-                        </div>
-                        <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ normal_probability }}%" aria-valuenow="{{ normal_probability }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
-                            <span class="text-muted font-weight-bold">Glaucoma Risk</span>
-                            <span class="font-mono-data font-weight-bold text-dark">{{ glaucoma_probability|stringformat:".1f" }}%</span>
-                        </div>
-                        <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
-                            <div class="progress-bar {% if analysis.diagnosis == 'Glaucoma' %}bg-danger{% else %}bg-warning{% endif %}" role="progressbar" style="width: {{ glaucoma_probability }}%" aria-valuenow="{{ glaucoma_probability }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="text-center py-4 text-muted border border-dashed rounded" style="font-size: 12px; background-color: var(--background);">
-                    <span class="material-symbols-outlined text-muted mb-2">monitoring</span>
-                    <p class="m-0">Probability unavailable.</p>
-                </div>
-            {% endif %}
-        </div>
 
-        <!-- 3. Confidence Meter -->
-        <div class="clinical-card mb-4">
-            <div class="clinical-card-header py-1 mb-3">
-                <h3 class="clinical-card-title" style="font-size: 13px;">Prediction Confidence</h3>
-            </div>
-            
-            {% if is_completed and analysis.confidence is not None %}
-                <div class="d-flex flex-column align-items-center justify-content-center py-2">
-                    <div style="width: 120px; height: 120px; position: relative;">
-                        <canvas id="confidenceMeterChart"></canvas>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                            <h4 class="font-mono-data font-weight-bold text-dark m-0" style="font-size: 18px;">{{ analysis.confidence|stringformat:".1f" }}%</h4>
-                            <span class="text-muted" style="font-size: 8.5px; text-transform: uppercase;">Confidence</span>
-                        </div>
+            <!-- 2. Processing Pipeline Status -->
+            <div class="clinical-card mb-0 flex-fill d-flex flex-column justify-content-between">
+                <div>
+                    <div class="clinical-card-header py-2 mb-2">
+                        <h3 class="clinical-card-title" style="font-size: 14.5px; font-weight: 700;">Processing Pipeline Status</h3>
                     </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Image File Loaded</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Green CLAHE Preprocessing</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Optic Disc Segmentation (v3)</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Optic Cup Segmentation (v4)</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Extract 11 Features</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>5-Classifier Glaucoma Prediction</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0" style="font-size: 12.5px; font-weight: 500;">
+                            <span>Clinical Report Formulation</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 10px; padding: 4px 8px;">✓ COMPLETED</span>
+                        </li>
+                    </ul>
                 </div>
-            {% else %}
-                <div class="text-center py-4 text-muted border border-dashed rounded" style="font-size: 12px; background-color: var(--background);">
-                    <span class="material-symbols-outlined text-muted mb-2">check_circle</span>
-                    <p class="m-0">Confidence value unavailable</p>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- 4. Processing Pipeline Status -->
-        <div class="clinical-card mb-0">
-            <div class="clinical-card-header py-1 mb-3">
-                <h3 class="clinical-card-title" style="font-size: 13px;">Processing Pipeline Status</h3>
             </div>
-            <ul class="list-group list-group-flush" style="font-size: 11.5px;">
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Image File Loaded</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Green CLAHE Preprocessing</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Optic Disc Segmentation</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Optic Cup Segmentation</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Feature Parameters Extraction</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Logistic Regression Classification</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-bottom-0">
-                    <span>Clinical Report Formulation</span>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle font-weight-bold" style="font-size: 9px;">✓ COMPLETED</span>
-                </li>
-            </ul>
         </div>
     </div>
 </div>
 
-<!-- Floating Print/Export Actions -->
+{% if is_completed %}
+    <!-- ======================================================= -->
+    <!-- 5-CLASSIFIER GLAUCOMA PREDICTION SYSTEM CONTROL CARD    -->
+    <!-- ======================================================= -->
+    <div class="clinical-card p-3 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 pb-3 border-bottom">
+            <div>
+                <h3 class="clinical-card-title m-0 d-flex align-items-center gap-2" style="font-size: 14px; font-weight: 700; color: var(--primary);">
+                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                    <span>5-Classifier Glaucoma Prediction System</span>
+                </h3>
+                <p class="m-0 text-muted mt-1" style="font-size: 11px;">
+                    Evaluates the single 11-feature vector across 5 independent trained ML classifiers.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div style="min-width: 190px;" class="flex-grow-1 flex-md-grow-0">
+                    <label for="predictionMethodSelect" class="form-label m-0 text-muted uppercase font-weight-bold" style="font-size: 9px;">Prediction Filter</label>
+                    <select id="predictionMethodSelect" class="form-select form-select-sm" style="font-size: 12px; font-weight: 600;">
+                        <option value="all" selected>All Models Independently</option>
+                        <option value="majority">Majority Voting</option>
+                        <option value="primary">Primary Model</option>
+                        <option value="aggregated">Probability Aggregation</option>
+                    </select>
+                </div>
+                <div id="primaryModelWrapper" style="display: none; min-width: 170px;" class="flex-grow-1 flex-md-grow-0">
+                    <label for="primaryModelSelect" class="form-label m-0 text-muted uppercase font-weight-bold" style="font-size: 9px;">Select Primary Model</label>
+                    <select id="primaryModelSelect" class="form-select form-select-sm" style="font-size: 12px; font-weight: 600;">
+                        <option value="logistic_regression" selected>Logistic Regression</option>
+                        <option value="svm">SVM</option>
+                        <option value="xgboost">XGBoost</option>
+                        <option value="mlp">MLP</option>
+                        <option value="extra_trees">Extra Trees</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Active Mode Summary Banner -->
+        <div id="activeFilterBanner" class="p-3 rounded-2" style="background-color: var(--surface-container-low); border: 1px solid var(--outline-variant);">
+            <div class="row align-items-center g-2">
+                <div class="col-md-7">
+                    <span id="activeModeLabel" class="text-uppercase text-muted font-weight-bold d-block" style="font-size: 9.5px; letter-spacing: 0.08em;">Active Filter: All Models Independently</span>
+                    <h4 id="activeModeTitle" class="m-0 font-weight-bold mt-1 text-dark" style="font-size: 14.5px;">Showing 5 Classifier Outputs Separately</h4>
+                    <p id="activeModeDesc" class="m-0 text-muted mt-1" style="font-size: 11px;">Comparing predictions from Logistic Regression, SVM, XGBoost, MLP, and Extra Trees on the same feature set.</p>
+                </div>
+                <div class="col-md-5 text-md-end">
+                    <div id="activeBannerBadge" class="d-inline-block">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive 5 Classifier Cards Grid (1 to 5 Columns dynamically) -->
+    <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 mb-4">
+        {% if clf_results and clf_results.models %}
+            {% for m in clf_results.models %}
+                <div class="col">
+                    <div class="clinical-card p-3 mb-0 h-100 border position-relative">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="font-weight-bold text-dark truncate" style="font-size: 11.5px;" title="{{ m.name }}">{{ m.name }}</span>
+                            {% if m.prediction == 1 %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" style="font-size: 9px; font-weight: 700;">GLAUCOMA</span>
+                            {% else %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 9px; font-weight: 700;">NORMAL</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 10px;">
+                                <span class="text-muted">Glaucoma Risk</span>
+                                <span class="font-mono-data font-weight-bold text-dark">{{ m.glaucoma_probability|stringformat:".1f" }}%</span>
+                            </div>
+                            <div class="progress" style="height: 6px; background-color: var(--surface-container-high); border-radius: 3px;">
+                                <div class="progress-bar {% if m.prediction == 1 %}bg-danger{% else %}bg-warning{% endif %}" role="progressbar" style="width: {{ m.glaucoma_probability }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top text-muted" style="font-size: 9.5px;">
+                            <span>Confidence</span>
+                            <span class="font-mono-data font-weight-bold text-dark">{{ m.confidence|stringformat:".1f" }}%</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Geometry Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-3 col-6">
+            <div class="clinical-card p-3 mb-0 h-100">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Disc Diameter</span>
+                <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 16px; font-weight: 700;">{{ analysis.disc_width }}x{{ analysis.disc_height }} <span style="font-size: 10px; font-weight: 500; color: var(--outline);">px</span></h3>
+                <p class="m-0 text-muted mt-1" style="font-size: 10.5px;">Width × Height</p>
+            </div>
+        </div>
+        <div class="col-sm-3 col-6">
+            <div class="clinical-card p-3 mb-0 h-100">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Cup Diameter</span>
+                <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 16px; font-weight: 700;">{{ analysis.cup_width }}x{{ analysis.cup_height }} <span style="font-size: 10px; font-weight: 500; color: var(--outline);">px</span></h3>
+                <p class="m-0 text-muted mt-1" style="font-size: 10.5px;">Width × Height</p>
+            </div>
+        </div>
+        <div class="col-sm-3 col-6">
+            <div class="clinical-card p-3 mb-0 h-100">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">HCDR</span>
+                <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 16px; font-weight: 700;">{{ analysis.hcdr|stringformat:".3f" }}</h3>
+                <p class="m-0 text-muted mt-1" style="font-size: 10.5px;">Horizontal C/D</p>
+            </div>
+        </div>
+        <div class="col-sm-3 col-6">
+            <div class="clinical-card p-3 mb-0 h-100">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Rim Ratio</span>
+                <h3 class="m-0 font-mono-data text-dark mt-1" style="font-size: 16px; font-weight: 700;">{{ analysis.rim_ratio|stringformat:".3f" }}</h3>
+                <p class="m-0 text-muted mt-1" style="font-size: 10.5px;">Rim/Disc Area</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 4 Clinical Visualizations Grid (2x2 Balanced Multi-Column Layout) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Clinical Geometry Profile -->
+        <div class="col-md-6">
+            <div class="clinical-card p-3 h-100 mb-0">
+                <div class="clinical-card-header mb-3 py-1">
+                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Clinical Geometry Profile</h3>
+                    <span class="text-muted" style="font-size: 9px;">Segmented U-Net Features</span>
+                </div>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 2. VCDR Risk Gauge -->
+        <div class="col-md-6">
+            <div class="clinical-card p-3 h-100 mb-0">
+                <div class="clinical-card-header mb-3 py-1">
+                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">VCDR Risk Gauge</h3>
+                    <span class="text-muted" style="font-size: 9px;">Actual Anatomical VCDR</span>
+                </div>
+                <div class="d-flex flex-column align-items-center justify-content-center" style="height: 240px;">
+                    <div style="width: 200px; height: 100px; position: relative; margin-bottom: 12px;">
+                        <canvas id="vcdrGaugeChart"></canvas>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Calculated VCDR</span>
+                        <h4 id="gaugeVcdrValue" class="font-mono-data font-weight-bold text-dark m-0 mt-1" style="font-size: 18px;">{{ analysis.vcdr|stringformat:".3f" }}</h4>
+                        <span id="gaugeRiskBadge" class="badge mt-1 text-uppercase" style="font-size: 10px; padding: 4px 8px; font-weight: 600;
+                                                                    {% if risk_level == 'success' %}background-color: var(--bs-success-bg-subtle); color: var(--bs-success); border: 1px solid var(--bs-success-border-subtle);
+                                                                    {% elif risk_level == 'warning' %}background-color: var(--bs-warning-bg-subtle); color: var(--bs-warning); border: 1px solid var(--bs-warning-border-subtle);
+                                                                    {% elif risk_level == 'orange' %}background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa;
+                                                                    {% else %}background-color: var(--bs-danger-bg-subtle); color: var(--bs-danger); border: 1px solid var(--bs-danger-border-subtle);{% endif %}">
+                            {{ clinical_category }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Area Tissue Distribution -->
+        <div class="col-md-6">
+            <div class="clinical-card p-3 h-100 mb-0">
+                <div class="clinical-card-header mb-3 py-1">
+                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Area Tissue Distribution</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1.2rem; justify-content: center; height: 210px;">
+                    <div>
+                        <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
+                            <span class="text-muted font-weight-bold">Optic Disc Area</span>
+                            <span id="discAreaText" class="font-mono-data font-weight-bold text-dark">{{ analysis.disc_area|stringformat:".0f" }} px (100%)</span>
+                        </div>
+                        <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
+                            <span class="text-muted font-weight-bold">Optic Cup Area</span>
+                            <span id="cupAreaText" class="font-mono-data font-weight-bold text-dark">{{ analysis.cup_area|stringformat:".0f" }} px ({{ cup_pct|stringformat:".1f" }}%)</span>
+                        </div>
+                        <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
+                            <div id="cupProgressBar" class="progress-bar bg-info" role="progressbar" style="width: {{ cup_pct }}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-1" style="font-size: 11px;">
+                            <span class="text-muted font-weight-bold">Neuroretinal Rim Area</span>
+                            <span id="rimAreaText" class="font-mono-data font-weight-bold text-dark">{{ analysis.rim_area|stringformat:".0f" }} px ({{ rim_pct|stringformat:".1f" }}%)</span>
+                        </div>
+                        <div class="progress" style="height: 10px; background-color: var(--surface-container-high); border-radius: 4px;">
+                            <div id="rimProgressBar" class="progress-bar bg-success" role="progressbar" style="width: {{ rim_pct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Diameter Parameters Comparison -->
+        <div class="col-md-6">
+            <div class="clinical-card p-3 h-100 mb-0">
+                <div class="clinical-card-header mb-3 py-1">
+                    <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Diameter Parameters Comparison</h3>
+                </div>
+                <div style="height: 210px; position: relative;">
+                    <canvas id="diameterComparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinical Interpretation Card -->
+    <div class="clinical-card p-3 mb-4">
+        <div class="clinical-card-header mb-3 py-1">
+            <h3 class="clinical-card-title" style="font-size: 12px; font-weight: 600;">Ophthalmic Diagnostic Interpretation</h3>
+        </div>
+        <div class="row g-3">
+            <div class="col-sm-4 border-end">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Active Decision Summary</span>
+                <h4 id="interpDiag" class="mt-1 font-weight-bold {% if clf_results.majority_voting.diagnosis == 'Glaucoma' %}text-danger{% else %}text-success{% endif %}" style="font-size: 16px;">
+                    {{ clf_results.majority_voting.diagnosis }}
+                </h4>
+                <span id="interpSub" class="text-muted font-mono-data mt-1 d-block" style="font-size: 11px;">
+                    Ensemble Consensus: {{ clf_results.majority_voting.vote_text }}
+                </span>
+            </div>
+            <div class="col-sm-8 ps-sm-3">
+                <span class="text-uppercase text-muted" style="font-size: 9px; font-weight: 700; letter-spacing: 0.05em;">Clinical Recommendation</span>
+                <p class="m-0 mt-1 text-dark" style="font-size: 12.5px; line-height: 1.45;">{{ recommendation }}</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Floating Actions -->
 <div class="d-flex justify-content-end gap-3 mt-4 no-print">
     <a href="{% url 'analysis:image_analysis' %}" class="btn btn-outline-secondary px-4 py-2 font-weight-bold" style="font-size: 13px;">
         Acquire New Image
@@ -525,6 +490,8 @@
         <span>Generate Clinical Report</span>
     </a>
 </div>
+
+{{ clf_results|json_script:"clf-results-data" }}
 {% endblock %}
 
 {% block extra_js %}
@@ -533,21 +500,270 @@
     document.addEventListener("DOMContentLoaded", function() {
         if (!{{ is_completed|yesno:"true,false" }}) return;
         
-        // Reference limit values defined in a single configuration object
+        let clfData = {};
+        const clfScript = document.getElementById('clf-results-data');
+        if (clfScript) {
+            try {
+                clfData = JSON.parse(clfScript.textContent) || {};
+            } catch(e) {
+                console.error("Error parsing clf-results-data:", e);
+            }
+        }
+        
+        // References for interactive filter controls
+        const methodSelect = document.getElementById('predictionMethodSelect');
+        const primaryWrapper = document.getElementById('primaryModelWrapper');
+        const primarySelect = document.getElementById('primaryModelSelect');
+        
+        const bannerLabel = document.getElementById('activeModeLabel');
+        const bannerTitle = document.getElementById('activeModeTitle');
+        const bannerDesc = document.getElementById('activeModeDesc');
+        const bannerBadge = document.getElementById('activeBannerBadge');
+        
+        const interpDiag = document.getElementById('interpDiag');
+        const interpSub = document.getElementById('interpSub');
+
+        const gaugeVcdrValue = document.getElementById('gaugeVcdrValue');
+        const gaugeRiskBadge = document.getElementById('gaugeRiskBadge');
+        
+        const discAreaText = document.getElementById('discAreaText');
+        const cupAreaText = document.getElementById('cupAreaText');
+        const rimAreaText = document.getElementById('rimAreaText');
+        const cupProgressBar = document.getElementById('cupProgressBar');
+        const rimProgressBar = document.getElementById('rimProgressBar');
+
+        // Global references for Chart.js instances to allow live updates
+        let radarChartInstance = null;
+        let gaugeChartInstance = null;
+        let diameterChartInstance = null;
+
+        // Base anatomical measurements from U-Net segmentation
+        const anatomicalFeatures = {
+            vcdr: parseFloat("{{ analysis.vcdr|default:0.0 }}"),
+            hcdr: parseFloat("{{ analysis.hcdr|default:0.0 }}"),
+            cdar: parseFloat("{{ analysis.cdar|default:0.0 }}"),
+            rim_ratio: parseFloat("{{ analysis.rim_ratio|default:0.0 }}"),
+            disc_area: parseFloat("{{ analysis.disc_area|default:0.0 }}"),
+            cup_area: parseFloat("{{ analysis.cup_area|default:0.0 }}"),
+            rim_area: parseFloat("{{ analysis.rim_area|default:0.0 }}"),
+            disc_height: parseFloat("{{ analysis.disc_height|default:0.0 }}"),
+            cup_height: parseFloat("{{ analysis.cup_height|default:0.0 }}"),
+            disc_width: parseFloat("{{ analysis.disc_width|default:0.0 }}"),
+            cup_width: parseFloat("{{ analysis.cup_width|default:0.0 }}")
+        };
+
+        // Reference limits for Radar Chart scaling
         const REFERENCE_LIMITS = {
             vcdr: 0.35,
             hcdr: 0.35,
             cdar: 0.15,
             rim_ratio: 0.85,
-            disc_area_scale: 25000.0, // Scale reference for radar (pixels)
-            cup_area_scale: 10000.0   // Scale reference for radar (pixels)
+            disc_area_scale: 25000.0,
+            cup_area_scale: 10000.0
         };
-        
-        // 1. Radar Chart Setup (Clinical Geometry Profile)
+
+        // Centralized Filter State Evaluator
+        function getFilteredClinicalState() {
+            const method = methodSelect ? methodSelect.value : 'all';
+            const primaryKey = primarySelect ? primarySelect.value : 'logistic_regression';
+            
+            let state = {
+                method: method,
+                primaryKey: primaryKey,
+                diagnosis: 'Normal',
+                confidence: 50.0,
+                filterName: 'All Models Independently',
+                labelShort: 'All 5 Models',
+                activeLabel: 'ACTIVE FILTER: ALL MODELS INDEPENDENTLY',
+                activeTitle: 'Showing 5 Classifier Outputs Separately',
+                activeDesc: 'Individual predictions from Logistic Regression, SVM, XGBoost, MLP, and Extra Trees on the single extracted 11-feature vector.',
+                badgeHTML: '',
+                subtext: '',
+                includedModels: clfData.models || [],
+                features: { ...anatomicalFeatures },
+                riskCategory: 'Normal',
+                riskClass: 'success'
+            };
+
+            if (method === 'all') {
+                const mv = clfData.majority_voting || {};
+                state.diagnosis = mv.diagnosis || 'Normal';
+                state.confidence = clfData.models ? (clfData.models.reduce((s, m) => s + m.confidence, 0) / clfData.models.length) : 50.0;
+                state.filterName = 'All Models Independently';
+                state.labelShort = '5 Models Avg';
+                state.activeLabel = 'ACTIVE FILTER: ALL MODELS INDEPENDENTLY';
+                state.activeTitle = 'Showing 5 Classifier Outputs Separately';
+                state.activeDesc = 'Comparing outputs across all 5 independent classifiers. Clinical geometry values reflect true U-Net segmentation.';
+                state.badgeHTML = `<span class="badge bg-secondary px-3 py-2" style="font-size: 12px; font-weight: 700;">5 INDEPENDENT MODELS</span>`;
+                state.subtext = `5-Model Consensus: ${mv.vote_text || ''}`;
+            }
+            else if (method === 'majority') {
+                const mv = clfData.majority_voting || {};
+                const diagText = mv.diagnosis || 'Normal';
+                const glaucomaVotes = mv.glaucoma_votes || 0;
+                const models = clfData.models || [];
+                
+                const majClass = (glaucomaVotes >= 3) ? 'Glaucoma' : 'Normal';
+                const majModels = models.filter(m => m.diagnosis === majClass);
+                state.includedModels = majModels.length > 0 ? majModels : models;
+                
+                state.diagnosis = diagText;
+                state.confidence = (glaucomaVotes >= 3 ? (glaucomaVotes / 5.0) * 100.0 : ((5 - glaucomaVotes) / 5.0) * 100.0);
+                state.filterName = 'Majority Voting';
+                state.labelShort = `Majority (${majModels.length}/5 models)`;
+                state.activeLabel = 'ACTIVE FILTER: MAJORITY VOTING (3/5 THRESHOLD)';
+                state.activeTitle = `Consensus Result: ${diagText}`;
+                state.activeDesc = `Majority Voting Group: ${majClass} (${majModels.map(m=>m.name).join(', ')}). Evaluated across binary classifier outputs.`;
+                const badgeBg = diagText === 'Glaucoma' ? 'bg-danger text-white' : 'bg-success text-white';
+                state.badgeHTML = `<span class="badge ${badgeBg} px-3 py-2" style="font-size: 12.5px; font-weight: 700;">MAJORITY: ${diagText.toUpperCase()} (${glaucomaVotes}/5 Glaucoma)</span>`;
+                state.subtext = `Majority Vote: ${mv.vote_text || ''}`;
+            }
+            else if (method === 'primary') {
+                const pModel = (clfData.models || []).find(m => m.key === primaryKey) || (clfData.models ? clfData.models[0] : {});
+                const diagText = pModel.diagnosis || 'Normal';
+                state.includedModels = [pModel];
+                state.diagnosis = diagText;
+                state.confidence = pModel.confidence || 50.0;
+                state.filterName = `Primary Model (${pModel.name || ''})`;
+                state.labelShort = `${pModel.name || 'Primary Model'}`;
+                state.activeLabel = `ACTIVE FILTER: PRIMARY MODEL (${(pModel.name || '').toUpperCase()})`;
+                state.activeTitle = `Primary Prediction: ${diagText}`;
+                state.activeDesc = `Using single primary classifier output: ${pModel.name} (${(pModel.confidence || 0).toFixed(1)}% Confidence).`;
+                const badgeBg = diagText === 'Glaucoma' ? 'bg-danger text-white' : 'bg-success text-white';
+                state.badgeHTML = `<span class="badge ${badgeBg} px-3 py-2" style="font-size: 12.5px; font-weight: 700;">${(pModel.name || '').toUpperCase()}: ${diagText.toUpperCase()} (${(pModel.confidence || 0).toFixed(1)}%)</span>`;
+                state.subtext = `Primary Model Selection: ${pModel.name} (${(pModel.confidence || 0).toFixed(1)}% Score)`;
+            }
+            else if (method === 'aggregated') {
+                const pa = clfData.probability_aggregation || {};
+                const diagText = pa.diagnosis || 'Normal';
+                state.diagnosis = diagText;
+                state.confidence = pa.aggregated_score || 50.0;
+                state.filterName = 'Probability Aggregation';
+                state.labelShort = 'Prob Aggregation';
+                state.activeLabel = 'ACTIVE FILTER: PROBABILITY AGGREGATION';
+                state.activeTitle = `Aggregated Score Result: ${diagText}`;
+                state.activeDesc = `Average Glaucoma Risk Probability Score across 5 models: ${(pa.aggregated_score || 0).toFixed(1)}%.`;
+                const badgeBg = diagText === 'Glaucoma' ? 'bg-danger text-white' : 'bg-success text-white';
+                state.badgeHTML = `<span class="badge ${badgeBg} px-3 py-2" style="font-size: 12.5px; font-weight: 700;">AGGREGATED SCORE: ${(pa.aggregated_score || 0).toFixed(1)}% (${diagText.toUpperCase()})</span>`;
+                state.subtext = `Aggregated Model Score: ${(pa.aggregated_score || 0).toFixed(1)}% (Soft Voting Consensus)`;
+            }
+
+            // Calculate VCDR risk category
+            const vcdrVal = state.features.vcdr;
+            if (vcdrVal < 0.50) {
+                state.riskCategory = "NORMAL (<0.50)";
+                state.riskClass = "success";
+            } else if (vcdrVal < 0.60) {
+                state.riskCategory = "BORDERLINE (0.50-0.60)";
+                state.riskClass = "warning";
+            } else if (vcdrVal < 0.70) {
+                state.riskCategory = "SUSPICIOUS (0.60-0.70)";
+                state.riskClass = "orange";
+            } else {
+                state.riskCategory = "HIGH RISK (>0.70)";
+                state.riskClass = "danger";
+            }
+
+            return state;
+        }
+
+        // Synchronized Live UI and Chart Update Handler
+        function updatePredictionFilterUI() {
+            if (!clfData || !clfData.models) return;
+            
+            const method = methodSelect ? methodSelect.value : 'all';
+            if (primaryWrapper) {
+                primaryWrapper.style.display = (method === 'primary') ? 'block' : 'none';
+            }
+
+            const state = getFilteredClinicalState();
+
+            // 1. Update Active Filter Banner
+            if (bannerLabel) bannerLabel.textContent = state.activeLabel;
+            if (bannerTitle) bannerTitle.textContent = state.activeTitle;
+            if (bannerDesc) bannerDesc.textContent = state.activeDesc;
+            if (bannerBadge) bannerBadge.innerHTML = state.badgeHTML;
+
+            // 2. Update Interpretation Card
+            if (interpDiag) {
+                interpDiag.textContent = state.diagnosis;
+                interpDiag.className = (state.diagnosis === 'Glaucoma') ? "mt-1 font-weight-bold text-danger" : "mt-1 font-weight-bold text-success";
+            }
+            if (interpSub) {
+                interpSub.textContent = state.subtext;
+            }
+
+            // 3. Update VCDR Risk Gauge Text & Readout Badge
+            if (gaugeVcdrValue) {
+                gaugeVcdrValue.textContent = state.features.vcdr.toFixed(3);
+            }
+            if (gaugeRiskBadge) {
+                gaugeRiskBadge.textContent = `${state.riskCategory} - ${state.labelShort}`;
+                if (state.riskClass === 'success') {
+                    gaugeRiskBadge.className = 'badge mt-1 text-uppercase bg-success-subtle text-success border border-success-subtle';
+                } else if (state.riskClass === 'warning') {
+                    gaugeRiskBadge.className = 'badge mt-1 text-uppercase bg-warning-subtle text-warning border border-warning-subtle';
+                } else if (state.riskClass === 'orange') {
+                    gaugeRiskBadge.className = 'badge mt-1 text-uppercase text-orange border border-warning';
+                    gaugeRiskBadge.style.backgroundColor = '#ffedd5';
+                    gaugeRiskBadge.style.color = '#ea580c';
+                } else {
+                    gaugeRiskBadge.className = 'badge mt-1 text-uppercase bg-danger-subtle text-danger border border-danger-subtle';
+                }
+            }
+
+            // 4. Update Area Tissue Distribution
+            const discA = state.features.disc_area;
+            const cupA = state.features.cup_area;
+            const rimA = state.features.rim_area;
+            const cupPct = discA > 0 ? (cupA / discA) * 100.0 : 0.0;
+            const rimPct = discA > 0 ? (rimA / discA) * 100.0 : 0.0;
+
+            if (discAreaText) discAreaText.textContent = `${discA.toFixed(0)} px (100%)`;
+            if (cupAreaText) cupAreaText.textContent = `${cupA.toFixed(0)} px (${cupPct.toFixed(1)}%)`;
+            if (rimAreaText) rimAreaText.textContent = `${rimA.toFixed(0)} px (${rimPct.toFixed(1)}%)`;
+            if (cupProgressBar) cupProgressBar.style.width = `${cupPct.toFixed(1)}%`;
+            if (rimProgressBar) rimProgressBar.style.width = `${rimPct.toFixed(1)}%`;
+
+            // 5. Update Chart.js Instances Dynamically
+            // Radar Chart Update
+            if (radarChartInstance) {
+                radarChartInstance.data.datasets[0].label = `Patient Parameters (${state.labelShort})`;
+                radarChartInstance.data.datasets[0].data = [
+                    state.features.vcdr,
+                    state.features.hcdr,
+                    state.features.cdar,
+                    state.features.rim_ratio,
+                    state.features.disc_area / REFERENCE_LIMITS.disc_area_scale,
+                    state.features.cup_area / REFERENCE_LIMITS.cup_area_scale
+                ];
+                radarChartInstance.update();
+            }
+
+            // VCDR Gauge Update
+            if (gaugeChartInstance) {
+                gaugeChartInstance.options.vcdrVal = state.features.vcdr;
+                gaugeChartInstance.update();
+            }
+
+            // Diameter Comparison Chart Update
+            if (diameterChartInstance) {
+                diameterChartInstance.data.datasets[0].label = `Optic Disc (${state.features.disc_width.toFixed(0)}x${state.features.disc_height.toFixed(0)}px)`;
+                diameterChartInstance.data.datasets[0].data = [state.features.disc_height, state.features.disc_width];
+                
+                diameterChartInstance.data.datasets[1].label = `Optic Cup (${state.features.cup_width.toFixed(0)}x${state.features.cup_height.toFixed(0)}px)`;
+                diameterChartInstance.data.datasets[1].data = [state.features.cup_height, state.features.cup_width];
+                
+                diameterChartInstance.update();
+            }
+        }
+
+        // Initialize Chart.js Instances ONCE
+        // 1. Clinical Geometry Profile (Radar Chart)
         const elRadar = document.getElementById('radarChart');
         if (elRadar) {
             const ctxRadar = elRadar.getContext('2d');
-            new Chart(ctxRadar, {
+            radarChartInstance = new Chart(ctxRadar, {
                 type: 'radar',
                 data: {
                     labels: ['VCDR', 'HCDR', 'CDAR', 'Rim Ratio', 'Disc Area', 'Cup Area'],
@@ -565,10 +781,7 @@
                             backgroundColor: 'rgba(0, 63, 139, 0.15)',
                             borderColor: '#003f8b',
                             borderWidth: 2,
-                            pointBackgroundColor: '#003f8b',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#003f8b'
+                            pointBackgroundColor: '#003f8b'
                         },
                         {
                             label: 'Normal Reference',
@@ -577,62 +790,37 @@
                                 REFERENCE_LIMITS.hcdr,
                                 REFERENCE_LIMITS.cdar,
                                 REFERENCE_LIMITS.rim_ratio,
-                                20000.0 / REFERENCE_LIMITS.disc_area_scale, // typical normal disc area ratio
-                                3000.0 / REFERENCE_LIMITS.cup_area_scale   // typical normal cup area ratio
+                                20000.0 / REFERENCE_LIMITS.disc_area_scale,
+                                3000.0 / REFERENCE_LIMITS.cup_area_scale
                             ],
                             backgroundColor: 'rgba(34, 197, 94, 0.05)',
                             borderColor: '#22c55e',
                             borderWidth: 1.5,
                             borderDash: [4, 4],
-                            pointBackgroundColor: '#22c55e',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#22c55e'
+                            pointBackgroundColor: '#22c55e'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, family: 'Inter' }
-                            }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0,0,0,0.05)' },
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            pointLabels: {
-                                font: { size: 10, family: 'Inter', weight: 'bold' },
-                                color: '#475569'
-                            },
-                            ticks: { display: false },
-                            min: 0,
-                            max: 1.2
-                        }
-                    }
+                    plugins: { legend: { position: 'top' } },
+                    scales: { r: { min: 0, max: 1.2, ticks: { display: false } } }
                 }
             });
         }
 
-        // 2. VCDR Risk Gauge Setup
+        // 2. VCDR Risk Gauge Init
         const elGauge = document.getElementById('vcdrGaugeChart');
         if (elGauge) {
             const ctxGauge = elGauge.getContext('2d');
-            const vcdrVal = {{ analysis.vcdr|default:0.0 }};
-            new Chart(ctxGauge, {
+            gaugeChartInstance = new Chart(ctxGauge, {
                 type: 'doughnut',
                 data: {
                     datasets: [{
-                        data: [0.30, 0.20, 0.10, 0.40], // Normal (0.3), Borderline (0.2), Suspicious (0.1), High Risk (0.4)
+                        data: [0.30, 0.20, 0.10, 0.40],
                         backgroundColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
-                        borderWidth: 0,
-                        hoverOffset: 0
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -641,10 +829,8 @@
                     circumference: 180,
                     rotation: 270,
                     cutout: '80%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
-                    }
+                    vcdrVal: {{ analysis.vcdr|default:0.0 }},
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
                 },
                 plugins: [{
                     id: 'gaugeNeedle',
@@ -654,11 +840,8 @@
                         const xCenter = chart.getDatasetMeta(0).data[0].x;
                         const yCenter = chart.getDatasetMeta(0).data[0].y;
                         const outerRadius = chart.getDatasetMeta(0).data[0].outerRadius;
-                        
-                        // Maps value [0, 1] to radians [Math.PI, 2 * Math.PI]
-                        const angle = Math.PI + (vcdrVal * Math.PI);
-                        
-                        // Draw needle
+                        const val = chart.options.vcdrVal !== undefined ? chart.options.vcdrVal : {{ analysis.vcdr|default:0.0 }};
+                        const angle = Math.PI + (val * Math.PI);
                         ctx.beginPath();
                         ctx.strokeStyle = '#0f172a';
                         ctx.lineWidth = 3.5;
@@ -667,53 +850,21 @@
                         const needleLen = outerRadius - 2;
                         ctx.lineTo(xCenter + needleLen * Math.cos(angle), yCenter + needleLen * Math.sin(angle));
                         ctx.stroke();
-                        
-                        // Center pivot point
                         ctx.beginPath();
                         ctx.arc(xCenter, yCenter, 7, 0, 2 * Math.PI);
                         ctx.fillStyle = '#0f172a';
                         ctx.fill();
-                        ctx.strokeStyle = '#ffffff';
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke();
                         ctx.restore();
                     }
                 }]
             });
         }
 
-        // 3. Confidence Meter Setup
-        const elConfidence = document.getElementById('confidenceMeterChart');
-        if (elConfidence) {
-            const ctxConfidence = elConfidence.getContext('2d');
-            const confidenceVal = {{ analysis.confidence|default:0.0 }};
-            new Chart(ctxConfidence, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [confidenceVal, 100.0 - confidenceVal],
-                        backgroundColor: ['#003f8b', '#e2e8f0'],
-                        borderWidth: 0,
-                        hoverOffset: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '82%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
-                    }
-                }
-            });
-        }
-
-        // 4. Diameter Comparison Chart Setup
+        // 3. Diameter Parameters Comparison Chart Init
         const elDiameter = document.getElementById('diameterComparisonChart');
         if (elDiameter) {
             const ctxDiameter = elDiameter.getContext('2d');
-            new Chart(ctxDiameter, {
+            diameterChartInstance = new Chart(ctxDiameter, {
                 type: 'bar',
                 data: {
                     labels: ['Height', 'Width'],
@@ -736,29 +887,18 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 10, family: 'Inter' }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { family: 'Inter', size: 9 } },
-                            title: { display: true, text: 'Pixels', font: { family: 'Inter', size: 10 } }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { font: { family: 'Inter', size: 10, weight: 'bold' } }
-                        }
-                    }
+                    plugins: { legend: { position: 'top' } },
+                    scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }
                 }
             });
         }
+
+        // Event Listeners for Live Interactivity
+        if (methodSelect) methodSelect.addEventListener('change', updatePredictionFilterUI);
+        if (primarySelect) primarySelect.addEventListener('change', updatePredictionFilterUI);
+        
+        // Initial execution to sync charts with default filter state
+        updatePredictionFilterUI();
     });
 </script>
 {% endblock %}

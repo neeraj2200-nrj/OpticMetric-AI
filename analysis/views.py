@@ -153,11 +153,8 @@ def analysis_results(request, analysis_id):
         disc_pct = 100.0 - cup_pct
         rim_pct = (analysis.rim_area / analysis.disc_area) * 100.0
         
-    # Re-run the classifier dynamically on the stored features to get probabilities and importances
-    normal_probability = None
-    glaucoma_probability = None
-    feature_importances = None
-    
+    # Re-run the 5-classifier system dynamically on stored features
+    clf_system_results = None
     if analysis.vcdr is not None:
         features_list = [
             analysis.disc_area,
@@ -172,14 +169,11 @@ def analysis_results(request, analysis_id):
             analysis.cdar,
             analysis.rim_ratio
         ]
-        from ml.classification.classifier import classify_features
+        from ml.classification.classifier import classify_features_all
         try:
-            clf_results = classify_features(features_list)
-            normal_probability = clf_results.get("normal_probability")
-            glaucoma_probability = clf_results.get("glaucoma_probability")
-            feature_importances = clf_results.get("feature_importances")
-        except Exception:
-            pass
+            clf_system_results = classify_features_all(features_list)
+        except Exception as e:
+            print(f"Error executing 5-Classifier System: {e}")
             
     # Get dynamic VCDR clinical category and recommendation guidelines
     clinical_category = "Pending Pipeline Execution"
@@ -207,8 +201,7 @@ def analysis_results(request, analysis_id):
         data = {
             "diagnosis": analysis.diagnosis,
             "confidence": analysis.confidence,
-            "normal_probability": normal_probability,
-            "glaucoma_probability": glaucoma_probability,
+            "clf_system": clf_system_results,
             "features": {
                 "disc_area": analysis.disc_area,
                 "cup_area": analysis.cup_area,
@@ -233,14 +226,11 @@ def analysis_results(request, analysis_id):
 
     context = {
         'analysis': analysis,
-        # Check if the analysis is fully completed (has values) or pending
         'is_completed': analysis.vcdr is not None,
         'disc_pct': disc_pct,
         'cup_pct': cup_pct,
         'rim_pct': rim_pct,
-        'feature_importances': feature_importances,
-        'normal_probability': normal_probability,
-        'glaucoma_probability': glaucoma_probability,
+        'clf_results': clf_system_results,
         'clinical_category': clinical_category,
         'recommendation': recommendation,
         'risk_level': risk_level,
